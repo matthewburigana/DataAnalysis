@@ -163,16 +163,16 @@ def plotVoltsVsCapacity(cycle, fileNum = 1):
     fileNum -= 1
     cycleCapacities = []
     cycleVoltages = []
-    lastCCap = 0.0
+    lastCap = 0.0
 
     # Appends voltages and capacities for the cell during the input cycle to the cycleVoltages and cycleCapacities
     # lists then plots the resulting data
     for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
         if(currents[fileNum][i] > 0.0):
             cycleCapacities.append(sCapacities[fileNum][i])
-            lastCCap = sCapacities[fileNum][i]
+            lastCap = sCapacities[fileNum][i]
         else:
-            cycleCapacities.append(-1*sCapacities[fileNum][i] + lastCCap)
+            cycleCapacities.append(-1*sCapacities[fileNum][i] + lastCap)
         cycleVoltages.append(voltages[fileNum][i])
     plt.plot(cycleCapacities, cycleVoltages, linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
@@ -218,6 +218,7 @@ def plotConnectedVoltsVsCapacity(fileNum = 1):
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
     plt.show()
     
+# Plots voltage vs capacity between the specified cycle window
 def plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1):
     fileNum -= 1
     caps = []
@@ -225,28 +226,28 @@ def plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1):
     lastCCap = 0.0
     lastDCap = 0.0
     
-    # During a charge cycle, each capacity and voltage is appended to their respective list
-    # and the last capacity in that cycle is stored in lastCCap then added to each capacity 
-    # in the discharge cycle to shift the discharge plot positive by the same amount as the 
-    # final charge capacity. During the discharge cycle, the negative of the discharge capacity 
-    # summed with the last charge capacity is appended to the capacity list then the last 
-    # discharge capacity is stored in lastDCap to be added to each charge capacity value
+    # Loops through the cycles from cycle1 to cycle2 inclusive
     for cycle in range(cycle1, cycle2+1):
         volts.append([])
         caps.append([])
         relativeIndex = 0
+        
+        # Loops through each index in cycle, appending voltages to volts and capacities to caps.
+        # The capacities are shifted by the last capacity in the preceding charge or discharge
+        # in the same way at plotConnectedVoltsVsCapacity
         for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
             if(currents[fileNum][i] < 0):
-                volts[cycle-1].append(voltages[fileNum][i])
-                caps[cycle-1].append(-1.0*sCapacities[fileNum][i] + lastCCap)
-                lastDCap = caps[cycle-1][relativeIndex]
-                relativeIndex += 1
+                volts[cycle-cycle1].append(voltages[fileNum][i])
+                caps[cycle-cycle1].append(-1.0*sCapacities[fileNum][i] + lastCCap)
+                lastDCap = caps[cycle-cycle1][relativeIndex]
             else:
-                volts[cycle-1].append(voltages[fileNum][i])
-                caps[cycle-1].append(sCapacities[fileNum][i] + lastDCap)
-                lastCCap = caps[cycle-1][relativeIndex]
-                relativeIndex += 1
-        plt.plot(caps[cycle-1], volts[cycle-1], linewidth = 2.0, color = 'C%d' % (cycle-1), label = 'Cycle %d' % cycle)
+                volts[cycle-cycle1].append(voltages[fileNum][i])
+                caps[cycle-cycle1].append(sCapacities[fileNum][i] + lastDCap)
+                lastCCap = caps[cycle-cycle1][relativeIndex]
+            relativeIndex += 1
+            
+        # Each cycle is labeled with its corresponding number and is plotted with a different color
+        plt.plot(caps[cycle-cycle1], volts[cycle-cycle1], linewidth = 2.0, color = 'C%d' % (cycle-cycle1), label = 'Cycle %d' % cycle)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
@@ -254,11 +255,15 @@ def plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1):
     
 # Plots voltage vs capacity for all input files during the input cycle
 def plotAllFilesVoltsVsCapacity(cycle = 1):
+    
+    # Loops through every file loaded
     for fileNum in range(numFiles):
         cycleCapacities = []
         cycleVoltages = []
         lastCCap = 0.0
-    
+        
+        # Loops through every index of the input cycle, appending voltages to cycleVoltages
+        # and capacities to cycleCapacities using the same formula as plotConnectedVoltsVsCapacity
         for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
             if(currents[fileNum][i] > 0.0):
                 cycleCapacities.append(sCapacities[fileNum][i])
@@ -283,32 +288,75 @@ def plotVoltageWindow(vMin, vMax, cycle = 1, fileNum = 1):
     numCharges = 0
     numDischarges = 0
     
-    # During a charge cycle, each capacity and voltage is appended to their respective list
-    # and the last capacity in that cycle is stored in lastCCap then added to each capacity 
-    # in the discharge cycle to shift the discharge plot positive by the same amount as the 
-    # final charge capacity. During the discharge cycle, the negative of the discharge capacity 
-    # summed with the last charge capacity is appended to the capacity list then the last 
-    # discharge capacity is stored in lastDCap to be added to each charge capacity value
+    # Loops through every index of the input cycle, appending voltages to volts and capacities to caps.
+    # Capacities and voltages are only appended when the voltage is between the voltage range inclusive.
+    # The last charge or discharge capacity is added to the following discharge or charge cycle, respectively
     for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
         if(currents[fileNum][i] < 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
-            if(lastDCap == 0):
-                lastCCap += lastCCap - (-1.0*sCapacities[fileNum][i] + lastCCap)
-            volts.append(voltages[fileNum][i])
+            
+            # For the first discharge capacity, the lastCCap shift is adjusted by adding the difference of
+            # the last charge capacity and the sum of the first negative discharge capacity at the maximum
+            # voltage and last used charge capacity to shift the discharge capacity to the last used capacity
+            if(numDischarges == 0):
+                lastCCap += sCapacities[fileNum][i]
+                numDischarges = 1
+                numCharges = 0
             caps.append(-1.0*sCapacities[fileNum][i] + lastCCap)
-            lastDCap = caps[numDischarges]
-            numDischarges += 1
-        elif(currents[fileNum][i] > 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
             volts.append(voltages[fileNum][i])
+            lastDCap = -1.0*sCapacities[fileNum][i] + lastCCap
+        elif(currents[fileNum][i] > 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
+            if(numCharges == 0):
+                lastDCap -= sCapacities[fileNum][i]
+                numDischarges = 0
+                numCharges = 1
             caps.append(sCapacities[fileNum][i] + lastDCap)
-            lastCCap = caps[numCharges]
-            numCharges += 1
+            volts.append(voltages[fileNum][i])
+            lastCCap = sCapacities[fileNum][i] + lastDCap
     plt.plot(caps, volts, linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
     plt.show()
     
+# Plots every cycle of the input file between the specified voltages
+def plotAllCyclesVoltageWindow(vMin, vMax, fileNum = 1):
+    fileNum -= 1
+    caps = []
+    volts = []
+    lastCCap = 0.0
+    lastDCap = 0.0
+    numCharges = 0
+    numDischarges = 0
+    
+    # Loops through every cycle of the input file appending the voltage used to volts and 
+    # shifted capacities to caps. Capacities are shifted using the same formula as plotVoltageWindow
+    for i in range(len(sCapacities[fileNum])):
+        if(currents[fileNum][i] < 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
+            if(numDischarges == 0):
+                lastCCap += sCapacities[fileNum][i]
+                numDischarges = 1
+                numCharges = 0
+            caps.append(-1.0*sCapacities[fileNum][i] + lastCCap)
+            volts.append(voltages[fileNum][i])
+            lastDCap = -1.0*sCapacities[fileNum][i] + lastCCap
+        elif(currents[fileNum][i] > 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
+            if(numCharges == 0):
+                lastDCap -= sCapacities[fileNum][i]
+                numDischarges = 0
+                numCharges = 1
+            caps.append(sCapacities[fileNum][i] + lastDCap)
+            volts.append(voltages[fileNum][i])
+            lastCCap = sCapacities[fileNum][i] + lastDCap
+    plt.plot(caps, volts, linewidth = 2.0)
+    plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
+    plt.ylabel('Voltage (V)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.show()
+    
+# Plots the voltages vs capacity for all voltages between vMin and vMax for the input cycle
 def plotAllFilesVoltageWindow(vMin, vMax, cycle = 1):
+    
+    # Loops through every file
     for fileNum in range(numFiles):
         caps = []
         volts = []
@@ -317,26 +365,66 @@ def plotAllFilesVoltageWindow(vMin, vMax, cycle = 1):
         numCharges = 0
         numDischarges = 0
         
-        # During a charge cycle, each capacity and voltage is appended to their respective list
-        # and the last capacity in that cycle is stored in lastCCap then added to each capacity 
-        # in the discharge cycle to shift the discharge plot positive by the same amount as the 
-        # final charge capacity. During the discharge cycle, the negative of the discharge capacity 
-        # summed with the last charge capacity is appended to the capacity list then the last 
-        # discharge capacity is stored in lastDCap to be added to each charge capacity value
+        # Loops through every index in the input cycle, appending voltages to volts and shifted capacities
+        # to caps. Capacities are shifted the same way as in plotVoltageWindow.
         for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
             if(currents[fileNum][i] < 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
-                if(lastDCap == 0):
-                    lastCCap += lastCCap - (-1.0*sCapacities[fileNum][i] + lastCCap)
-                volts.append(voltages[fileNum][i])
+                if(numDischarges == 0):
+                    lastCCap += sCapacities[fileNum][i]
+                    numDischarges = 1
+                    numCharges = 0
                 caps.append(-1.0*sCapacities[fileNum][i] + lastCCap)
-                lastDCap = caps[numDischarges]
-                numDischarges += 1
-            elif(currents[fileNum][i] > 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
                 volts.append(voltages[fileNum][i])
+                lastDCap = -1.0*sCapacities[fileNum][i] + lastCCap
+            elif(currents[fileNum][i] > 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
+                if(numCharges == 0):
+                    lastDCap -= sCapacities[fileNum][i]
+                    numDischarges = 0
+                    numCharges = 1
                 caps.append(sCapacities[fileNum][i] + lastDCap)
-                lastCCap = caps[numCharges]
-                numCharges += 1
+                volts.append(voltages[fileNum][i])
+                lastCCap = sCapacities[fileNum][i] + lastDCap
         plt.plot(caps, volts, linewidth = 2.0)
+        plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
+        plt.ylabel('Voltage (V)', fontsize = 'x-large')        
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.show()
+    
+# Plots voltage vs capacity for voltages between vMin and vMax and cycles between cycle1 and cycle2
+def plotVoltageWindowCycleWindow(vMin, vMax, cycle1, cycle2, fileNum = 1):
+    fileNum -= 1
+    caps = []
+    volts = []
+    lastCCap = 0.0
+    lastDCap = 0.0
+    numCharges = 0
+    numDischarges = 0
+    
+    # Loops through the cycles between cycle1 and cycle2
+    for cycle in range(cycle1, cycle2+1):
+        volts.append([])
+        caps.append([])
+        
+        # Loops through the indices of each cycle, appending voltages to volts and capacities to caps, 
+        # shifting the capacities using the same formula as in plotVoltageWindow
+        for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
+            if(currents[fileNum][i] < 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
+                if(numDischarges == 0):
+                    lastCCap += sCapacities[fileNum][i]
+                    numDischarges = 1
+                    numCharges = 0
+                caps[cycle-cycle1].append(-1.0*sCapacities[fileNum][i] + lastCCap)
+                volts[cycle-cycle1].append(voltages[fileNum][i])
+                lastDCap = -1.0*sCapacities[fileNum][i] + lastCCap
+            elif(currents[fileNum][i] > 0 and voltages[fileNum][i] >= vMin and voltages[fileNum][i] <= vMax):
+                if(numCharges == 0):
+                    lastDCap -= sCapacities[fileNum][i]
+                    numDischarges = 0
+                    numCharges = 1
+                caps[cycle-cycle1].append(sCapacities[fileNum][i] + lastDCap)
+                volts[cycle-cycle1].append(voltages[fileNum][i])
+                lastCCap = sCapacities[fileNum][i] + lastDCap
+        plt.plot(caps[cycle-cycle1], volts[cycle-cycle1], linewidth = 2.0, color = 'C%d' % (cycle-cycle1), label = 'Cycle %d' % cycle)
         plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
         plt.ylabel('Voltage (V)', fontsize = 'x-large')        
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
@@ -737,7 +825,7 @@ def plotDischargeVsRate():
     plt.xlim((9, 1250))
     plt.show()
     
-# Runs plotting methods to generate 5 plots for the input file
+# Runs plotting methods to generate 3 plots for the input file
 def plot(fileNum = 1):
     plotConnectedVoltsVsCapacity(fileNum)
     plotCapacityVsCycle(fileNum)
@@ -753,7 +841,9 @@ print('plotAllCyclesVoltsVsCapacity(fileNum = 1)')
 print('plotConnectedVoltsVsCapacity(fileNum = 1)')
 print('plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1)')
 print('plotAllFilesVoltsVsCapacity(cycle = 1)')
+print('plotVoltageWindowCycleWindow(vMin, vMax, cycle1, cycle2, fileNum = 1)')
 print('plotVoltageWindow(vMin, vMax, cycle = 1, fileNum = 1)')
+print('plotAllCyclesVoltageWindow(vMin, vMax, fileNum = 1)')
 print('plotAllFilesVoltageWindow(vMin, vMax, cycle = 1)')
 print('plotdQVsVolts(cycle = 1, fileNum = 1)')
 print('plotdQCycleWindow(cycle1, cycle2, fileNum = 1)')
@@ -772,24 +862,25 @@ print('plotDischargeVsRate()')
 print('plot(fileNum = 1)\n')
 
 newFile()
-# plotVoltsVsCapacityCycleWindow(1, 11)
+# plotVoltageWindowCycleWindow(3.5, 4.2, 5, 10)
+# plotAllCyclesVoltageWindow(2.3, 6)
+# plotVoltsVsCapacityCycleWindow(1, 3)
+# plotAllFilesVoltsVsCapacity(1)
+# plotAllCyclesVoltsVsCapacity(1)
+# plotConnectedVoltsVsCapacity(1)
+# plotVoltsVsCapacity(1)
+# plotVoltageWindow(3.5,4.1)
+# plotAllFilesVoltageWindow(3.5,4.1)
 # plot()
 # plotAllCyclesdQVsVolts()
 # plotdQCycleWindow(1,2)
-# plotVoltageWindow(3.5,4.1)
-# plotAllFilesVoltageWindow(3.5,4.1)
 # plotAllFilesdQVsVolts(1)
-# plotAllFilesVoltsVsCapacity(1)
 # plotCapacityVsRate()
 # plotDischargeVsRate()
 # plotAllFilesCapacityVsCycle()
-# plotAllCyclesVoltsVsCapacity(1)
 # plotdQVsVolts(2)
 # cellInfo(1)
-# plotConnectedVoltsVsCapacity(1)
 # setMass(1)
-# plotConnectedVoltsVsCapacity(1)
-# plotVoltsVsCapacity(1)
 # plotChargeCapacityVsCycle(1)
 # plotDischargeCapacityVsCycle(1)
 # plotCapacityVsCycle(1)
