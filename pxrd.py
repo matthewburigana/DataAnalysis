@@ -3,7 +3,7 @@ import os
 from itertools import islice
 import matplotlib.pyplot as plt
 
-filepath = 'C:\\Users\\McCalla Lab\\Documents\\Data\\Matthew\\PXRD\\Test\\'
+filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\PXRD\\'
  
 # Lists to store the x and y data to be fit
 xData = []
@@ -51,6 +51,9 @@ def processor(name):
     numFiles += 1
     print('File %d: %s' % (numFiles, name))
         
+# Plots the PXRD data of the input file number. If there are 10 or less files, the plot
+# will be the color corresponding to the file number and if there are more than 10 loaded
+# files, all spectra will be plotted as a single color. 
 def plotXRD(fileNum = 1):
     fileNum -= 1
     plt.figure(1)
@@ -58,7 +61,10 @@ def plotXRD(fileNum = 1):
         plt.plot(xData[fileNum], yData[fileNum], 'bo', ms = 1.5)
         plt.plot(xData[fileNum], yFit[fileNum], 'r', linewidth = 1.5)
     else:
-        plt.plot(xData[fileNum], yData[fileNum], 'C%d' % fileNum, linewidth = 1.5)
+        if(numFiles <= 10):
+            plt.plot(xData[fileNum], yData[fileNum], 'C%d' % fileNum, linewidth = 1.5)
+        else:
+            plt.plot(xData[fileNum], yData[fileNum], linewidth = 1.5)
     plt.xlabel('Scattering Angle (deg.)', fontsize = 'x-large')
     plt.ylabel('Intensity',  fontsize = 'x-large')
     plt.tick_params('y', labelleft = False)
@@ -66,10 +72,11 @@ def plotXRD(fileNum = 1):
     plt.xlim(min(xData[fileNum]), max(xData[fileNum]))
     plt.show()
     
+# Plots all loaded PXRD files as a stacked vertical plot. 
 def plotAllXRD():
     plt.figure(1)
     for i in range(len(xData)):
-        plt.plot(xData[i], yData[i], 'C%d' % i, linewidth = 1.5)
+        plt.plot(xData[i], yData[i], linewidth = 1.5, label = 'File %d' % (i+1))
     plt.xlabel('Scattering Angle (deg.)', fontsize = 'x-large')
     plt.ylabel('Intensity',  fontsize = 'x-large')
     plt.tick_params('y', labelleft = False)
@@ -77,6 +84,7 @@ def plotAllXRD():
     plt.xlim(min(xData[i]), max(xData[i]))
     plt.show()
     
+# Clears all stored data from the loaded files.
 def clear():
     global numFiles
     numFiles = 0
