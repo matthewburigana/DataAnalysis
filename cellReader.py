@@ -64,7 +64,7 @@ def newFile():
             
             # Skips the rest step by changing restStep back to false once the charge cycle
             # is entered
-            if('CC_Chg' in row[2] or 'CC_DChg' in row[2]):
+            if('CC_Chg' in row[2] or 'CC_DChg' in row[2] or row[0] != ''):
                 restStep = False
                 
             if(restStep):
