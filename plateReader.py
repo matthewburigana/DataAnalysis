@@ -3,7 +3,7 @@ from itertools import islice
 import matplotlib.pyplot as plt
 import numpy as np
 
-filepath = 'C:\\Users\\McCalla Lab\\Documents\\Data\\Matthew\\Cells\\'
+filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\Cells\\'
 
 # Empty global lists to store the cycle numbers, times, and voltages in chronological order and 
 # charge and discharge capacities and resistances
@@ -76,9 +76,10 @@ def newFile():
 # Set the mass of the sample on a channel
 def setMass(channel):
     newMass = float(input('Enter the new sample mass for channel %d in grams: ' % channel))
-    for i in range(min(cycles), int(max(cycles)/2) + 1):
-        chgCapacities[i-1][channel-1] = chgCapacities[i-1][channel-1]*mass[channel]/newMass
-        dchgCapacities[i-1][channel-1] = dchgCapacities[i-1][channel-1]*mass[channel]/newMass
+    if(chgCapacities[0] != []):
+        for i in range(min(cycles), int(max(cycles)/2) + 1):
+            chgCapacities[i-1][channel-1] = chgCapacities[i-1][channel-1]*mass[channel]/newMass
+            dchgCapacities[i-1][channel-1] = dchgCapacities[i-1][channel-1]*mass[channel]/newMass
     mass[channel] = newMass
     
 # Exports the masses, charge and discharge capacities and resistances to a CSV file
@@ -216,8 +217,8 @@ def plotCurrentVsVolts(channel, cycle):
         for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle-1)):
             chargeVoltages.append(voltages[i])
             chargeCurrents.append(channels[channel][i])
-        chargePlot, = plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 0.75, label = 'Charge')
-        dischargePlot, = plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 0.75, label = 'Discharge')
+        chargePlot, = plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 2.0, label = 'Charge')
+        dischargePlot, = plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 2.0, label = 'Discharge')
         
         # Positions the legend to the top left corner outside the plot
         box = ax.get_position()
@@ -237,8 +238,8 @@ def plotCurrentVsVolts(channel, cycle):
          
     # Plots the charge currents vs charge voltages in blue then the discharge currents vs 
     # discharge voltages in red
-        chargePlot, = plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 0.75, label = 'Charge')
-        dischargePlot, = plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 0.75, label = 'Discharge')
+        chargePlot, = plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 2.0, label = 'Charge')
+        dischargePlot, = plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 2.0, label = 'Discharge')
         
         # Positions the legend to the top left corner outside the plot
         box = ax.get_position()
@@ -285,7 +286,7 @@ def plotCurrentVsVolts64(cycle):
             for j in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
                 chargeVoltages.append(voltages[j])
                 chargeCurrents.append(channels[i][j])
-            plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 0.75, label = 'Charge')
+            plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
             if(i%8 == 0):
                 plt.xlabel('Voltage (V)')
             if(i <= 8):
@@ -298,8 +299,8 @@ def plotCurrentVsVolts64(cycle):
                 else:
                     dischargeVoltages.append(voltages[j])
                     dischargeCurrents.append(channels[i][j])
-            plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 0.75, label = 'Charge')
-            plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 0.75, label = 'Discharge')
+            plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
+            plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 1.75, label = 'Discharge')
             if(i%8 == 0):
                 plt.xlabel('Voltage (V)')
             if(i <= 8):
@@ -310,7 +311,7 @@ def plotCurrentVsVolts64(cycle):
 
 # Plots the current vs voltage for every cycle on the input channel
 def plotAllCyclesCurrentVsVolts(channel):
-    plt.plot(voltages, channels[channel], linewidth = 1.0)
+    plt.plot(voltages, channels[channel], linewidth = 2.0)
     plt.title('Current on Channel %d During each Cycle' % channel)
     plt.xlabel('Voltage (V)')
     plt.ylabel('Current (\u03BCA)')
@@ -339,7 +340,7 @@ def plotAllCyclesCurrentVsVolts64():
             loc = i + (7*(i-64))
         ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
         ax.title.set_visible(False)
-        plt.plot(voltages, channels[i], linewidth = 0.75)
+        plt.plot(voltages, channels[i], linewidth = 1.75)
         if(i%8 == 0):
             plt.xlabel('Voltage (V)')
         if(i <= 8):
@@ -364,8 +365,8 @@ def plotVoltsVsCurrent(channel, cycle):
             else: 
                 dischargeCurrents.append(channels[channel][i])
                 dischargeVoltages.append(voltages[i])
-        chargePlot, = plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 0.75, label = 'Charge')
-        dischargePlot, = plt.plot(dischargeCurrents, dischargeVoltages, 'r', linewidth = 0.75, label = 'Discharge')
+        chargePlot, = plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 2, label = 'Charge')
+        dischargePlot, = plt.plot(dischargeCurrents, dischargeVoltages, 'r', linewidth = 2, label = 'Discharge')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
@@ -376,7 +377,7 @@ def plotVoltsVsCurrent(channel, cycle):
         for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle-1)):
             chargeCurrents.append(channels[channel][i])
             chargeVoltages.append(voltages[i])
-        chargePlot, = plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 0.75, label = 'Charge')
+        chargePlot, = plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 2, label = 'Charge')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
@@ -422,8 +423,8 @@ def plotVoltsVsCurrent64(cycle):
             
             ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
             ax.title.set_visible(False)
-            plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 0.75, label = 'Charge')
-            plt.plot(dischargeCurrents, dischargeVoltages, 'r', linewidth = 0.75, label = 'Discharge')
+            plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 1.75, label = 'Charge')
+            plt.plot(dischargeCurrents, dischargeVoltages, 'r', linewidth = 1.75, label = 'Discharge')
             if(i%8 == 0):
                 plt.xlabel('Current (\u03BCA)')
             if(i <= 8):
@@ -434,7 +435,7 @@ def plotVoltsVsCurrent64(cycle):
                 chargeVoltages.append(voltages[j])
             ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
             ax.title.set_visible(False)
-            plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 0.75, label = 'Charge')
+            plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 1.75, label = 'Charge')
             if(i%8 == 0):
                 plt.xlabel('Current (\u03BCA)')
             if(i <= 8):
@@ -445,7 +446,7 @@ def plotVoltsVsCurrent64(cycle):
 
 # Plots the voltage vs current for the input channel
 def plotAllCyclesVoltsVsCurrent(channel):
-    plt.plot(channels[channel], voltages, linewidth = 0.75)
+    plt.plot(channels[channel], voltages, linewidth = 2.0)
     plt.title('Voltage on Channel %d During every Cycle' % channel)
     plt.xlabel('Current (\u03BCA)')
     plt.ylabel('Voltage (V)')
@@ -475,7 +476,7 @@ def plotAllCyclesVoltsVsCurrent64():
             loc = i + (7*(i-64))
         ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
         ax.title.set_visible(False)
-        plt.plot(channels[i], voltages, linewidth = 0.75)
+        plt.plot(channels[i], voltages, linewidth = 1.75)
         if(i%8 == 0):
             plt.xlabel('Current (\u03BCA)')
         if(i <= 8):
@@ -495,7 +496,7 @@ def plotVoltsVsTime(cycle):
         for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle)):
             cycleVoltages.append(voltages[i])
             cycleTimes.append(times[i])
-        plt.plot(cycleTimes, cycleVoltages, linewidth = 0.75)
+        plt.plot(cycleTimes, cycleVoltages, linewidth = 2.0)
         plt.title('Change in Voltage During Cycle %d' % cycle)
         plt.xlabel('Time (hr)')
         plt.ylabel('Voltage (V)')
@@ -503,7 +504,7 @@ def plotVoltsVsTime(cycle):
         for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
             cycleVoltages.append(voltages[i])
             cycleTimes.append(times[i])
-        plt.plot(cycleTimes, cycleVoltages, linewidth = 0.75)
+        plt.plot(cycleTimes, cycleVoltages, linewidth = 2.0)
         plt.title('Change in Voltage During Cycle %d' % cycle)
         plt.xlabel('Time (hr)')
         plt.ylabel('Voltage (V)')
@@ -513,7 +514,7 @@ def plotVoltsVsTime(cycle):
     
 # Plots voltage vs time for every cycle
 def plotAllCyclesVoltsVsTime():
-    plt.plot(times, voltages, linewidth = 0.75)
+    plt.plot(times, voltages, linewidth = 2.0)
     plt.title('Change in Voltage During each Cycle')
     plt.xlabel('Time (hr)')
     plt.ylabel('Voltage (V)')
@@ -530,7 +531,7 @@ def plotCurrentVsTime(channel, cycle):
         for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle)):
             cycleCurrents.append(channels[channel][i])
             cycleTimes.append(times[i])
-        plt.plot(cycleTimes, cycleCurrents, linewidth = 0.75)
+        plt.plot(cycleTimes, cycleCurrents, linewidth = 2.0)
         plt.title('Change in Current on Channel %d During Cycle %d' % (channel, cycle))
         plt.xlabel('Time (hr)')
         plt.ylabel('Current (\u03BCA)')
@@ -538,7 +539,7 @@ def plotCurrentVsTime(channel, cycle):
         for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
             cycleCurrents.append(channels[channel][i])
             cycleTimes.append(times[i])
-        plt.plot(cycleTimes, cycleCurrents, linewidth = 0.75)
+        plt.plot(cycleTimes, cycleCurrents, linewidth = 2.0)
         plt.title('Change in Current on Channel %d During Cycle %d' % (channel, cycle))
         plt.xlabel('Time (hr)')
         plt.ylabel('Current (\u03BCA)')
@@ -547,7 +548,7 @@ def plotCurrentVsTime(channel, cycle):
 
 # Plots current vs time for all the cycles on the input channel
 def plotAllCyclesCurrentVsTime(channel):
-    plt.plot(times, channels[channel], linewidth = 0.75)
+    plt.plot(times, channels[channel], linewidth = 2.0)
     plt.title('Change in Current on Channel %d During each Cycle' % channel)
     plt.xlabel('Time (hr)')
     plt.ylabel('Current (\u03BCA)')
@@ -579,8 +580,8 @@ def plotVoltsVsCapacity(channel, cycle):
                 if(i != len(cycles) - 1):
                     dischargeCapacities.append(((0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i]))/mass[channel])/1000.0)
                 dischargeVoltages.append(voltages[i])
-        chargePlot, = ax.plot(chargeCapacities, chargeVoltages, 'b', linewidth = 0.75, label = 'Charge')
-        dischargePlot, = ax.plot(dischargeCapacities, dischargeVoltages, 'r', linewidth = 0.75, label = 'Discharge')
+        chargePlot, = ax.plot(chargeCapacities, chargeVoltages, 'b', linewidth = 2.0, label = 'Charge')
+        dischargePlot, = ax.plot(dischargeCapacities, dischargeVoltages, 'r', linewidth = 2.0, label = 'Discharge')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
@@ -592,7 +593,7 @@ def plotVoltsVsCapacity(channel, cycle):
             if(i != len(cycles) - 1):
                 chargeCapacities.append(((0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i]))/mass[channel])/1000.0)
             chargeVoltages.append(voltages[i])
-        chargePlot, = ax.plot(chargeCapacities, chargeVoltages, 'b', linewidth = 0.75, label = 'Charge')
+        chargePlot, = ax.plot(chargeCapacities, chargeVoltages, 'b', linewidth = 2.0, label = 'Charge')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
@@ -602,6 +603,7 @@ def plotVoltsVsCapacity(channel, cycle):
     plt.show()
     plt.close()
 
+# Plots the charge and discharge capacities of the input channel for each cycle
 def plotCapacityVsCycle(channel):
     chgCapacity = []
     dchgCapacity = []
@@ -619,8 +621,8 @@ def plotCapacityVsCycle(channel):
         discharge = capacity(channel, j)['Discharge capacity (mAh/g)']
         chgCapacity.append(charge)
         dchgCapacity.append(-1.0*discharge)
-    chgplot, = ax.plot(cycle, chgCapacity, 'bo', label = 'Charge')
-    dchgplot, = ax.plot(cycle, dchgCapacity, 'rD', label = 'Discharge')
+    chgplot, = ax.plot(cycle, chgCapacity, 'bo', label = 'Charge', ms = 4.0)
+    dchgplot, = ax.plot(cycle, dchgCapacity, 'ro', label = 'Discharge', ms = 4.0)
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
     ax.legend(handles = [chgplot, dchgplot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
@@ -650,9 +652,9 @@ def plotChargeCapacityVsCycle(channel):
     for j in cycle:
         charge = capacity(channel, j)['Charge capacity (mAh/g)']
         cycleCapacity.append(charge)
-    plt.plot(cycle, cycleCapacity, 'bo')
-    for value in cycle:
-        plt.annotate('%f' % cycleCapacity[value-1], xy = (value, cycleCapacity[value-1]), xytext = (value, cycleCapacity[value-1] + 0.007*cycleCapacity[value-1]))
+    plt.plot(cycle, cycleCapacity, 'bo', ms = 4.0)
+#     for value in cycle:
+#         plt.annotate('%f' % cycleCapacity[value-1], xy = (value, cycleCapacity[value-1]), xytext = (value, cycleCapacity[value-1] + 0.007*cycleCapacity[value-1]))
     plt.title('Charge Capacity at each Cycle for Channel %d' % channel)
     if(len(cycle) > 10):
         ticks = []
@@ -666,6 +668,7 @@ def plotChargeCapacityVsCycle(channel):
     plt.show()
     plt.close()
 
+# Plots the discharge capacity of the input channel for each cycle
 def plotDischargeCapacityVsCycle(channel):
     cycleCapacity = []
     cycle = []
@@ -678,9 +681,9 @@ def plotDischargeCapacityVsCycle(channel):
     for j in cycle:
         discharge = capacity(channel, j)['Discharge capacity (mAh/g)']
         cycleCapacity.append(-1.0*discharge)
-    plt.plot(cycle, cycleCapacity, 'rD')
-    for value in cycle:
-        plt.annotate('%f' % cycleCapacity[value-1], xy = (value, cycleCapacity[value-1]), xytext = (value, cycleCapacity[value-1] + 0.007*cycleCapacity[value-1]))
+    plt.plot(cycle, cycleCapacity, 'ro', ms = 4.0)
+#     for value in cycle:
+#         plt.annotate('%f' % cycleCapacity[value-1], xy = (value, cycleCapacity[value-1]), xytext = (value, cycleCapacity[value-1] + 0.007*cycleCapacity[value-1]))
     plt.title('Discharge Capacity at each Cycle for Channel %d' % channel)
     if(len(cycle) > 10):
         ticks = []
@@ -725,6 +728,7 @@ print('plotDischargeCapacityVsCycle(channel)\n')
 newFile()
 # allCapacities()
 # allResistances()
+# setMass(1)
 # export()
 # capacity(1,1)
 # capacityAllCycles(1)
