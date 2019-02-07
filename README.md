@@ -1,5 +1,5 @@
 # DataAnalysis
-Package containing scripts to analyze CSV files for Neware exports, Medusa2012 exports, Rietica exports, and phase diagrams.
+Package containing scripts to analyze CSV files for Neware exports, Medusa2012 exports, Rietica exports, and phase diagrams. See "DataAnalysis Package Instructions" for a detailed list of all available methods and the steps required to change the file path used in each script. 
 ## plateReader
 Processes CSV files produced by the Medusa2012 program for 64 pad combi plates. An example file called “plateFile.csv” can be found in the shared Code folder. 
 1.  From the Anaconda3 folder, open the python.exe application.
