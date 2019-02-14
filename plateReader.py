@@ -3,7 +3,7 @@ from itertools import islice
 import matplotlib.pyplot as plt
 import numpy as np
 
-filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\Cells\\'
+filepath = ''
 
 # Empty global lists to store the cycle numbers, times, and voltages in chronological order and 
 # charge and discharge capacities and resistances
@@ -59,7 +59,7 @@ def newFile():
                 channels[j].append(float(row[j+5]))
 
     # Appends empty lists to store resistances and capacities when they are calculated
-    for k in range(int(max(cycles)/2)):
+    for _ in range(int(max(cycles)/2)):
         resistance.append([])
         chgCapacities.append([])
         dchgCapacities.append([])
