@@ -1,9 +1,10 @@
 import csv
 from itertools import islice
+from matplotlib import rc, rcParams
 import matplotlib.pyplot as plt
 import numpy as np
 
-filepath = ''
+filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\Cells\\'
 
 # Empty global lists to store the cycle numbers, times, and voltages in chronological order and 
 # charge and discharge capacities and resistances
@@ -17,30 +18,34 @@ meanResistances = []
 stdevResistances = []
 
 # A mass dictionary for the mass of each channel
-mass = {x: 0.0 for x in range(1, 65)}
+# mass = {x: 0.0 for x in range(1, 65)}
+mass = []
 
 # A dictionary to store the currents from each channel where the channel
 # number is the key and the value is a list of currents
-channels = {x: [] for x in range(1, 65)}
+# channels = {x: [] for x in range(1, 65)}
+channels = []
+
+numFiles = 0
 
 # Initializes a new file by clearing all previously stored data then processing the data stored
 # by the new input file
 def newFile():
+    global numFiles
     filename = input('Enter the CSV file name: ') + '.csv'
     massFile = input('Enter the mass file name: ') + '.csv'
-    if (cycles != []):
-        cycles.clear()
-        times.clear()
-        voltages.clear()
-        for key in channels:
-            mass[key] = 0.0
-            channels[key].clear()
-        chgCapacities.clear()
-        dchgCapacities.clear()
-        resistance.clear()
-        meanResistances.clear()
-        stdevResistances.clear()
-        
+
+    cycles.append([])
+    times.append([])
+    voltages.append([])
+    chgCapacities.append([])
+    dchgCapacities.append([])
+    resistance.append([])
+    meanResistances.append([])
+    stdevResistances.append([])
+    mass.append({x: 0.0 for x in range(1, 65)})
+    channels.append({x: [] for x in range(1, 65)})  
+            
     with open(filepath + filename, 'r') as inputData:
         reader = csv.reader(inputData, dialect = 'excel')
         
@@ -49,20 +54,20 @@ def newFile():
         for row in islice(reader, 8, None):
             if(row[0] == ''):
                 break
-            cycles.append(int(row[0]))
-            times.append(float(row[1]))
-            voltages.append(float(row[5]))
+            cycles[numFiles].append(int(row[0]))
+            times[numFiles].append(float(row[1]))
+            voltages[numFiles].append(float(row[5]))
         
             # Appends the current for each channel in the current list at each channel
             # in the channels dictionary
             for j in range(1, 65):
-                channels[j].append(float(row[j+5]))
+                channels[numFiles][j].append(float(row[j+5]))
 
     # Appends empty lists to store resistances and capacities when they are calculated
-    for _ in range(int(max(cycles)/2)):
-        resistance.append([])
-        chgCapacities.append([])
-        dchgCapacities.append([])
+    for _ in range(int(max(cycles[numFiles])/2)):
+        resistance[numFiles].append([])
+        chgCapacities[numFiles].append([])
+        dchgCapacities[numFiles].append([])
         
     # Reads masses stored in the same file format as an exported file
     if(massFile != ''):
@@ -70,20 +75,39 @@ def newFile():
             massRead = csv.reader(masses, dialect = 'excel')
             for row in islice(massRead, 1, None):
                 for i in range(1,65):
-                    mass[i] = float(row[i+1])
+                    mass[numFiles][i] = float(row[i+1])
                 break
+    numFiles += 1
+            
+def clear():
+    global numFiles
+    cycles.clear()
+    times.clear()
+    voltages.clear()
+    for file in range(numFiles):
+        for key in channels[file]:
+            mass[file][key] = 0.0
+            channels[file][key].clear()
+    chgCapacities.clear()
+    dchgCapacities.clear()
+    resistance.clear()
+    meanResistances.clear()
+    stdevResistances.clear()
+    numFiles = 0
     
 # Set the mass of the sample on a channel
-def setMass(channel):
+def setMass(channel, fileNum = 1):
+    fileNum -= 1
     newMass = float(input('Enter the new sample mass for channel %d in grams: ' % channel))
-    if(chgCapacities[0] != []):
-        for i in range(min(cycles), int(max(cycles)/2) + 1):
-            chgCapacities[i-1][channel-1] = chgCapacities[i-1][channel-1]*mass[channel]/newMass
-            dchgCapacities[i-1][channel-1] = dchgCapacities[i-1][channel-1]*mass[channel]/newMass
-    mass[channel] = newMass
+    if(chgCapacities[fileNum][0] != []):
+        for i in range(min(cycles[fileNum]), int(max(cycles[fileNum])/2) + 1):
+            chgCapacities[fileNum][i-1][channel-1] = chgCapacities[fileNum][i-1][channel-1]*mass[fileNum][channel]/newMass
+            dchgCapacities[fileNum][i-1][channel-1] = dchgCapacities[fileNum][i-1][channel-1]*mass[fileNum][channel]/newMass
+    mass[fileNum][channel] = newMass
     
 # Exports the masses, charge and discharge capacities and resistances to a CSV file
-def export():
+def export(fileNum = 1):
+    fileNum -= 1
     outputFile = input('Enter the export file name: ') + '.csv'
     allCapacities()
     allResistances()
@@ -93,63 +117,65 @@ def export():
         channelMass = []
         for i in range(1,65):
             channel.append('Channel %d' % i)
-            channelMass.append(mass[i])
+            channelMass.append(mass[fileNum][i])
         writer.writerow(['Cycle', 'Name'] + channel)
         writer.writerow(['','Mass (g)'] + channelMass)
-        for cycle in range(min(cycles), int(max(cycles)/2) + 1):
-            writer.writerow([cycle, 'Charge (mAh/g)'] + chgCapacities[cycle-1])
-            writer.writerow(['', 'Discharge (mAh/g)'] + dchgCapacities[cycle-1])
-            writer.writerow(['', 'Resistance'] + resistance[cycle-1])
-            writer.writerow(['', 'Mean Resistance'] + [meanResistances[cycle-1]])
-            writer.writerow(['', 'Standard Deviation'] + [stdevResistances[cycle-1]])
+        for cycle in range(min(cycles[fileNum]), int(max(cycles[fileNum])/2) + 1):
+            writer.writerow([cycle, 'Charge (mAh/g)'] + chgCapacities[fileNum][cycle-1])
+            writer.writerow(['', 'Discharge (mAh/g)'] + dchgCapacities[fileNum][cycle-1])
+            writer.writerow(['', 'Resistance'] + resistance[fileNum][cycle-1])
+            writer.writerow(['', 'Mean Resistance'] + [meanResistances[fileNum][cycle-1]])
+            writer.writerow(['', 'Standard Deviation'] + [stdevResistances[fileNum][cycle-1]])
         
 # Calculates the charge and discharge capacity of a channel during the specified cycle
 # between the minimum and maximum voltages. Integrates dQ = Idt
-def capacity(channel, cycle):
+def capacity(channel, cycle = 1, fileNum = 1):
+    fileNum -= 1
     qCharge = 0.0
     qDischarge = 0.0
-    if(mass[channel] == 0.0):
-        mass[channel] = float(input('Enter the sample mass for channel %d in grams: ' % channel))
-    for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle)):
+    if(mass[fileNum][channel] == 0.0):
+        mass[fileNum][channel] = float(input('Enter the sample mass for channel %d in grams: ' % channel))
+    for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
         
         # Only adds to charge capacity during a charging cycle and only if the voltages are 
         # between those specified. The average of the capacity and the next capacity are taken
         # and multiplied by the difference in time of those measurements
-        if(2*cycle - 1 == cycles[i] and i != len(cycles) - 1):
-            qCharge += 0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i])
+        if(2*cycle - 1 == cycles[fileNum][i] and i != len(cycles[fileNum]) - 1):
+            qCharge += 0.5*(channels[fileNum][channel][i] + channels[fileNum][channel][i+1])*(times[fileNum][i+1] - times[fileNum][i])
             
         # Adds to discharge capacity during a discharge cycle if the voltages are within the 
         # specified voltages and the iterator is not at the last value of the cycles
-        elif(2*cycle == cycles[i] and i != len(cycles) - 1):
-            qDischarge += 0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i])
+        elif(2*cycle == cycles[fileNum][i] and i != len(cycles[fileNum]) - 1):
+            qDischarge += 0.5*(channels[fileNum][channel][i] + channels[fileNum][channel][i+1])*(times[fileNum][i+1] - times[fileNum][i])
                 
     # Converts the capacities to Ah/g then returns a dictionary listing the channel, cycle,
     # charge and discharge capacities
-    qCharge = round(qCharge/mass[channel]/1000.0, 8)
-    qDischarge = round(qDischarge/mass[channel]/1000.0, 8)
-    if(len(chgCapacities[cycle-1]) < 64):
-        chgCapacities[cycle-1].append(qCharge)
-        dchgCapacities[cycle-1].append(qDischarge)
+    qCharge = round(qCharge/mass[fileNum][channel]/1000.0, 8)
+    qDischarge = round(qDischarge/mass[fileNum][channel]/1000.0, 8)
+    if(len(chgCapacities[fileNum][cycle-1]) < 64):
+        chgCapacities[fileNum][cycle-1].append(qCharge)
+        dchgCapacities[fileNum][cycle-1].append(qDischarge)
     return({'Channel': channel, 'Cycle': cycle, 'Charge capacity (mAh/g)': qCharge, 'Discharge capacity (mAh/g)': qDischarge})
 
 # Prints the capacity of all 64 channels in the input cycle
-def capacity64(cycle):
+def capacity64(cycle = 1, fileNum = 1):
     for i in range(1,65):
-        print(capacity(i, cycle))
+        print(capacity(i, cycle, fileNum))
       
 # Prints the capacity of each cycle for the input channel
-def capacityAllCycles(channel):
-    for i in range(min(cycles), int(max(cycles)/2) + 1):
-        print(capacity(channel, i))
+def capacityAllCycles(channel, fileNum = 1):
+    for i in range(min(cycles[fileNum-1]), int(max(cycles[fileNum-1])/2) + 1):
+        print(capacity(channel, i, fileNum))
     
 # Prints the capacities of all the channels for all the cycles    
-def allCapacities():
+def allCapacities(fileNum = 1):
     for i in range(1,65):
-        for j in range(min(cycles), int(max(cycles)/2) + 1):
-            print(capacity(i, j))
+        for j in range(min(cycles[fileNum-1]), int(max(cycles[fileNum-1])/2) + 1):
+            print(capacity(i, j, fileNum))
 
 # Calculates then prints the average voltages of each channel using Vavg = VdQ/Q
-def averageVoltages(startTime, endTime):
+def averageVoltages(startTime, endTime, fileNum = 1):
+    fileNum -= 1
     capacities = {}
     for i in range(1, 65):
         capacities[i] = []
@@ -158,53 +184,56 @@ def averageVoltages(startTime, endTime):
         # Appends the specific capacity at each time to the capacities dictionary then calculates the 
         # differential voltage and adds that to the sum of VdQ then divides that sum by the total capacity
         # to give the average voltage
-        for j in range(len(times)):
-            if(times[j] >= startTime and times[j] <= endTime and j < len(times) - 1):
-                capacities[i].append(0.5*(channels[i][j] + channels[i][j+1])*(times[j+1] - times[j])/1000000.0)
+        for j in range(len(times[fileNum])):
+            if(times[fileNum][j] >= startTime and times[fileNum][j] <= endTime and j < len(times[fileNum]) - 1):
+                capacities[i].append(0.5*(channels[fileNum][i][j] + channels[fileNum][i][j+1])*(times[fileNum][j+1] - times[fileNum][j])/1000000.0)
         totalCapacity = sum(capacities[i])
-        for k in range(len(times)):
-            if(times[k] >= startTime and times[k] <= endTime and k < len(capacities[i]) - 1):
-                voltage += 0.5*(voltages[k] + voltages[k+1])*(capacities[i][k+1] - capacities[i][k])/totalCapacity
+        for k in range(len(times[fileNum])):
+            if(times[fileNum][k] >= startTime and times[fileNum][k] <= endTime and k < len(capacities[i]) - 1):
+                voltage += 0.5*(voltages[fileNum][k] + voltages[fileNum][k+1])*(capacities[i][k+1] - capacities[i][k])/totalCapacity
         print('Channel %d average voltage: %f V' % (i, voltage))
     
 # Prints the resistances of all 64 channels based on the linear regression of 
 # voltage vs current for the charging cycle
-def resistances(cycle):
+def resistances(cycle = 1, fileNum = 1):
+    fileNum -= 1
     for i in range(1, 65):
         cycleCurrents = []
         cycleVoltages = []
-        for j in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-            cycleCurrents.append(channels[i][j]/1000000.0)
-            cycleVoltages.append(voltages[j])
+        for j in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+            cycleCurrents.append(channels[fileNum][i][j]/1000000.0)
+            cycleVoltages.append(voltages[fileNum][j])
         param = np.polyfit(cycleCurrents, cycleVoltages, 1)
         print('Channel %d resistance: %f Ohms' % (i, param[0]))
-        if(len(resistance[cycle-1]) < 64):
-            resistance[cycle-1].append(param[0])
+        if(len(resistance[fileNum][cycle-1]) < 64):
+            resistance[fileNum][cycle-1].append(param[0])
         
     # Calculates and prints the mean, standard deviation and variance of the 64 resistance
     # values
-    stdev = np.std(resistance[cycle-1], ddof = 1)
-    variance = np.var(resistance[cycle-1], ddof = 1)
-    mean = np.mean(resistance[cycle-1])
-    if(len(meanResistances) < max(cycles)/2):
-        meanResistances.append(mean)
-        stdevResistances.append(stdev)
+    stdev = np.std(resistance[fileNum][cycle-1], ddof = 1)
+    variance = np.var(resistance[fileNum][cycle-1], ddof = 1)
+    mean = np.mean(resistance[fileNum][cycle-1])
+    if(len(meanResistances[fileNum]) < max(cycles[fileNum])/2):
+        meanResistances[fileNum].append(mean)
+        stdevResistances[fileNum].append(stdev)
     print('Average: %f' % mean)
     print('Standard Deviation: %f' % stdev)
     print('Variance: %f' % variance)
 
 # Prints resistances for ever channel during each cycle
-def allResistances():
-    for i in range(min(cycles), int(max(cycles)/2) + 1):
+def allResistances(fileNum = 1):
+    for i in range(min(cycles[fileNum-1]), int(max(cycles[fileNum-1])/2) + 1):
         print('\nCycle %d' % i)
-        resistances(i)
+        resistances(i, fileNum)
     
 # Plots the current vs voltage for one channel during the input cycle
-def plotCurrentVsVolts(channel, cycle):
+def plotCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5, cycle = 1, fileNum = 1):
+    fileNum -= 1
     chargeVoltages = []
     chargeCurrents = []
     dischargeVoltages = []
     dischargeCurrents = []
+    rc('font', weight = 'bold')
     plt.figure(1)
     ax = plt.subplot(111)
     
@@ -213,10 +242,10 @@ def plotCurrentVsVolts(channel, cycle):
 #   cycle. Loops through the currents for the specified cycle stored in the channels 
 #   dictionary at the specified channel and stores the charge currents in the 
 #   chargeCurrents list and discharge currents in the dischargeCurrents list.
-    if cycle*2 not in cycles:
-        for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-            chargeVoltages.append(voltages[i])
-            chargeCurrents.append(channels[channel][i])
+    if cycle*2 not in cycles[fileNum]:
+        for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+            chargeVoltages.append(voltages[fileNum][i])
+            chargeCurrents.append(channels[fileNum][channel][i])
         chargePlot, = plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 2.0, label = 'Charge')
         dischargePlot, = plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 2.0, label = 'Discharge')
         
@@ -227,14 +256,16 @@ def plotCurrentVsVolts(channel, cycle):
         plt.title('Current on Channel %d During Cycle %d' % (channel, cycle))
         plt.xlabel('Voltage (V)')
         plt.ylabel('Current (\u03BCA)')
+        plt.tick_params(direction='in')
+        plt.xlim((xMin, xMax))
     else:
-        for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle)):
-            if(cycles[i] == 2*cycle - 1):
-                chargeVoltages.append(voltages[i])
-                chargeCurrents.append(channels[channel][i])
+        for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+            if(cycles[fileNum][i] == 2*cycle - 1):
+                chargeVoltages.append(voltages[fileNum][i])
+                chargeCurrents.append(channels[fileNum][channel][i])
             else:
-                dischargeVoltages.append(voltages[i])
-                dischargeCurrents.append(channels[channel][i])
+                dischargeVoltages.append(voltages[fileNum][i])
+                dischargeCurrents.append(channels[fileNum][channel][i])
          
     # Plots the charge currents vs charge voltages in blue then the discharge currents vs 
     # discharge voltages in red
@@ -245,15 +276,18 @@ def plotCurrentVsVolts(channel, cycle):
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
-        plt.title('Current on Channel %d During Cycle %d' % (channel, cycle))
-        plt.xlabel('Voltage (V)')
-        plt.ylabel('Current (\u03BCA)')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+        plt.title('Current on Channel %d During Cycle %d' % (channel, cycle), fontsize = 'xx-large', weight = 'bold')
+        plt.xlabel('Voltage (V)', fontsize = 'x-large', weight = 'bold')
+        plt.ylabel('Current (\u03BCA)', fontsize = 'x-large', weight = 'bold')
+        plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
+        plt.xlim((xMin, xMax))
     plt.show()
     plt.close()
 
 # Plots the current vs voltage for all 64 channels in one window
-def plotCurrentVsVolts64(cycle):
+def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
+    fileNum -= 1
+    rc('font', weight = 'bold')
     plt.figure(1)   
 
     # Loops through the 64 channels and adds each new plot as a subplot to figure 1,
@@ -282,44 +316,59 @@ def plotCurrentVsVolts64(cycle):
         chargeCurrents = []
         dischargeVoltages = []
         dischargeCurrents = []
-        if cycle*2 not in cycles:
-            for j in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-                chargeVoltages.append(voltages[j])
-                chargeCurrents.append(channels[i][j])
-            plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
+        if cycle*2 not in cycles[fileNum]:
+            for j in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+                chargeVoltages.append(voltages[fileNum][j])
+                chargeCurrents.append(channels[fileNum][i][j])
+            rc('font', weight = 'bold')
+            plt.tick_params('x', labelbottom = False)
+            plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
+            ax.spines['top'].set_linewidth(1.5)
+            ax.spines['right'].set_linewidth(1.5)
+            ax.spines['bottom'].set_linewidth(1.5)
+            ax.spines['left'].set_linewidth(1.5)
+            plt.xlim((xMin, xMax))
             if(i%8 == 0):
-                plt.xlabel('Voltage (V)')
-            if(i <= 8):
-                plt.ylabel('Current (\u03BCA)')
+                plt.tick_params('x', labelbottom = True)
         else:
-            for j in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle)):
-                if(cycles[j] == 2*cycle - 1):
-                    chargeVoltages.append(voltages[j])
-                    chargeCurrents.append(channels[i][j])
+            for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+                if(cycles[fileNum][j] == 2*cycle - 1):
+                    chargeVoltages.append(voltages[fileNum][j])
+                    chargeCurrents.append(channels[fileNum][i][j])
                 else:
-                    dischargeVoltages.append(voltages[j])
-                    dischargeCurrents.append(channels[i][j])
+                    dischargeVoltages.append(voltages[fileNum][j])
+                    dischargeCurrents.append(channels[fileNum][i][j])
             plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
             plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 1.75, label = 'Discharge')
+            plt.tick_params('x', labelbottom = False)
+            plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
+            ax.spines['top'].set_linewidth(1.5)
+            ax.spines['right'].set_linewidth(1.5)
+            ax.spines['bottom'].set_linewidth(1.5)
+            ax.spines['left'].set_linewidth(1.5)
+            plt.xlim((xMin, xMax))
             if(i%8 == 0):
-                plt.xlabel('Voltage (V)')
-            if(i <= 8):
-                plt.ylabel('Current (\u03BCA)')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+                plt.tick_params('x', labelbottom = True)
     plt.show()
     plt.close()
 
 # Plots the current vs voltage for every cycle on the input channel
-def plotAllCyclesCurrentVsVolts(channel):
-    plt.plot(voltages, channels[channel], linewidth = 2.0)
-    plt.title('Current on Channel %d During each Cycle' % channel)
-    plt.xlabel('Voltage (V)')
-    plt.ylabel('Current (\u03BCA)')
+def plotAllCyclesCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5, fileNum = 1):
+    fileNum -= 1
+    rc('font', weight = 'bold')
+    plt.plot(voltages[fileNum], channels[fileNum][channel], 'b', linewidth = 2.0)
+    plt.title('Current on Channel %d During each Cycle' % channel, fontsize = 'xx-large', weight = 'bold')
+    plt.xlabel('Voltage (V)', fontsize = 'x-large', weight = 'bold')
+    plt.ylabel('Current (\u03BCA)', fontsize = 'x-large', weight = 'bold')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
+    plt.xlim((xMin, xMax))
     plt.show()
     plt.close()
 
 # Plots current vs voltage for every cycle on all 64 channels in one window
-def plotAllCyclesCurrentVsVolts64():
+def plotAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1):
+    fileNum -= 1
+    rc('font', weight = 'bold')
     plt.figure(1)
     for i in range(1,65):
         if(i <= 8):
@@ -340,31 +389,39 @@ def plotAllCyclesCurrentVsVolts64():
             loc = i + (7*(i-64))
         ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
         ax.title.set_visible(False)
-        plt.plot(voltages, channels[i], linewidth = 1.75)
+        plt.plot(voltages[fileNum], channels[fileNum][i], 'b', linewidth = 1.75)
+        plt.tick_params('x', labelbottom = False)
+        plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
+        ax.spines['top'].set_linewidth(1.5)
+        ax.spines['right'].set_linewidth(1.5)
+        ax.spines['bottom'].set_linewidth(1.5)
+        ax.spines['left'].set_linewidth(1.5)
+        plt.xlim((xMin, xMax))
         if(i%8 == 0):
-            plt.xlabel('Voltage (V)')
-        if(i <= 8):
-            plt.ylabel('Current (\u03BCA)')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+            plt.tick_params('x', labelbottom = True)
     plt.show()
     plt.close()
     
+def plotNormalizedCurrentVsVolts():
+    pass
+    
 # Plots voltage as a function of current for the input channel during the input cycle
-def plotVoltsVsCurrent(channel, cycle):
+def plotVoltsVsCurrent(channel, cycle = 1, fileNum = 1):
+    fileNum -= 1
     chargeCurrents = []
     chargeVoltages = []
     dischargeCurrents = []
     dischargeVoltages = []
     plt.figure(1)
     ax = plt.subplot(111)
-    if 2*cycle in cycles:
-        for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle)):
-            if(cycles[i] == 2*cycle - 1): 
-                chargeCurrents.append(channels[channel][i])
-                chargeVoltages.append(voltages[i])
+    if 2*cycle in cycles[fileNum]:
+        for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+            if(cycles[fileNum][i] == 2*cycle - 1): 
+                chargeCurrents.append(channels[fileNum][channel][i])
+                chargeVoltages.append(voltages[fileNum][i])
             else: 
-                dischargeCurrents.append(channels[channel][i])
-                dischargeVoltages.append(voltages[i])
+                dischargeCurrents.append(channels[fileNum][channel][i])
+                dischargeVoltages.append(voltages[fileNum][i])
         chargePlot, = plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 2, label = 'Charge')
         dischargePlot, = plt.plot(dischargeCurrents, dischargeVoltages, 'r', linewidth = 2, label = 'Discharge')
         box = ax.get_position()
@@ -374,9 +431,9 @@ def plotVoltsVsCurrent(channel, cycle):
         plt.xlabel('Current (\u03BCA)')
         plt.ylabel('Voltage (V)')
     else:
-        for i in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-            chargeCurrents.append(channels[channel][i])
-            chargeVoltages.append(voltages[i])
+        for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+            chargeCurrents.append(channels[fileNum][channel][i])
+            chargeVoltages.append(voltages[fileNum][i])
         chargePlot, = plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 2, label = 'Charge')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
@@ -389,7 +446,8 @@ def plotVoltsVsCurrent(channel, cycle):
     plt.close()
 
 # Plots voltage vs current for all 64 channels in one window for the imput cycle
-def plotVoltsVsCurrent64(cycle):
+def plotVoltsVsCurrent64(cycle = 1, fileNum = 1):
+    fileNum -= 1
     plt.figure(1)
     for i in range(1,65):
         if(i <= 8):
@@ -412,14 +470,14 @@ def plotVoltsVsCurrent64(cycle):
         chargeVoltages = []
         dischargeCurrents = []
         dischargeVoltages = []
-        if 2*cycle in cycles:
-            for j in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle)):
-                if(cycles[j] == 2*cycle - 1): 
-                    chargeCurrents.append(channels[i][j])
-                    chargeVoltages.append(voltages[j])
+        if 2*cycle in cycles[fileNum]:
+            for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+                if(cycles[fileNum][j] == 2*cycle - 1): 
+                    chargeCurrents.append(channels[fileNum][i][j])
+                    chargeVoltages.append(voltages[fileNum][j])
                 else: 
-                    dischargeCurrents.append(channels[i][j])
-                    dischargeVoltages.append(voltages[j])
+                    dischargeCurrents.append(channels[fileNum][i][j])
+                    dischargeVoltages.append(voltages[fileNum][j])
             
             ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
             ax.title.set_visible(False)
@@ -430,9 +488,9 @@ def plotVoltsVsCurrent64(cycle):
             if(i <= 8):
                 plt.ylabel('Voltage (V)')
         else:
-            for j in range(cycles.index(2*cycle - 1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-                chargeCurrents.append(channels[i][j])
-                chargeVoltages.append(voltages[j])
+            for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+                chargeCurrents.append(channels[fileNum][i][j])
+                chargeVoltages.append(voltages[fileNum][j])
             ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
             ax.title.set_visible(False)
             plt.plot(chargeCurrents, chargeVoltages, 'b', linewidth = 1.75, label = 'Charge')
@@ -445,8 +503,9 @@ def plotVoltsVsCurrent64(cycle):
     plt.close()
 
 # Plots the voltage vs current for the input channel
-def plotAllCyclesVoltsVsCurrent(channel):
-    plt.plot(channels[channel], voltages, linewidth = 2.0)
+def plotAllCyclesVoltsVsCurrent(channel, fileNum = 1):
+    fileNum -= 1
+    plt.plot(channels[fileNum][channel], voltages[fileNum], 'b', linewidth = 2.0)
     plt.title('Voltage on Channel %d During every Cycle' % channel)
     plt.xlabel('Current (\u03BCA)')
     plt.ylabel('Voltage (V)')
@@ -455,7 +514,8 @@ def plotAllCyclesVoltsVsCurrent(channel):
     plt.close()
     
 # Plots voltage vs current for all cycles on all 64 channels in one window
-def plotAllCyclesVoltsVsCurrent64():
+def plotAllCyclesVoltsVsCurrent64(fileNum = 1):
+    fileNum -= 1
     plt.figure(1)
     for i in range(1,65):
         if(i <= 8):
@@ -476,34 +536,35 @@ def plotAllCyclesVoltsVsCurrent64():
             loc = i + (7*(i-64))
         ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
         ax.title.set_visible(False)
-        plt.plot(channels[i], voltages, linewidth = 1.75)
+        plt.plot(channels[fileNum][i], voltages[fileNum], 'b', linewidth = 1.75)
+        plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
         if(i%8 == 0):
             plt.xlabel('Current (\u03BCA)')
         if(i <= 8):
             plt.ylabel('Voltage (V)')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
     plt.show()
     plt.close()
 
 # Plots voltage vs time during the input cycle
-def plotVoltsVsTime(cycle):
+def plotVoltsVsTime(cycle = 1, fileNum = 1):
+    fileNum -= 1
     cycleVoltages = []
     cycleTimes = []
     
     # Stores the voltages and times during the input cycle in the cycleVoltages and
     # cycleTimes lists respectively
-    if cycle*2 in cycles:
-        for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle)):
-            cycleVoltages.append(voltages[i])
-            cycleTimes.append(times[i])
+    if cycle*2 in cycles[fileNum]:
+        for i in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+            cycleVoltages.append(voltages[fileNum][i])
+            cycleTimes.append(times[fileNum][i])
         plt.plot(cycleTimes, cycleVoltages, linewidth = 2.0)
         plt.title('Change in Voltage During Cycle %d' % cycle)
         plt.xlabel('Time (hr)')
         plt.ylabel('Voltage (V)')
     else:
-        for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-            cycleVoltages.append(voltages[i])
-            cycleTimes.append(times[i])
+        for i in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+            cycleVoltages.append(voltages[fileNum][i])
+            cycleTimes.append(times[fileNum][i])
         plt.plot(cycleTimes, cycleVoltages, linewidth = 2.0)
         plt.title('Change in Voltage During Cycle %d' % cycle)
         plt.xlabel('Time (hr)')
@@ -513,8 +574,9 @@ def plotVoltsVsTime(cycle):
     plt.close()
     
 # Plots voltage vs time for every cycle
-def plotAllCyclesVoltsVsTime():
-    plt.plot(times, voltages, linewidth = 2.0)
+def plotAllCyclesVoltsVsTime(fileNum = 1):
+    fileNum -= 1
+    plt.plot(times[fileNum], voltages[fileNum], linewidth = 2.0)
     plt.title('Change in Voltage During each Cycle')
     plt.xlabel('Time (hr)')
     plt.ylabel('Voltage (V)')
@@ -522,23 +584,24 @@ def plotAllCyclesVoltsVsTime():
     plt.close()
     
 # Plots current vs time for the input channel and cycle
-def plotCurrentVsTime(channel, cycle):
+def plotCurrentVsTime(channel, cycle = 1, fileNum = 1):
+    fileNum -= 1
     cycleCurrents = []
     cycleTimes = []
     
     # Stores the currents and times for the input cycle in cycleCurrents and cycleTimes
-    if cycle*2 in cycles:
-        for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle)):
-            cycleCurrents.append(channels[channel][i])
-            cycleTimes.append(times[i])
+    if cycle*2 in cycles[fileNum]:
+        for i in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+            cycleCurrents.append(channels[fileNum][channel][i])
+            cycleTimes.append(times[fileNum][i])
         plt.plot(cycleTimes, cycleCurrents, linewidth = 2.0)
         plt.title('Change in Current on Channel %d During Cycle %d' % (channel, cycle))
         plt.xlabel('Time (hr)')
         plt.ylabel('Current (\u03BCA)')
     else:
-        for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-            cycleCurrents.append(channels[channel][i])
-            cycleTimes.append(times[i])
+        for i in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+            cycleCurrents.append(channels[fileNum][channel][i])
+            cycleTimes.append(times[fileNum][i])
         plt.plot(cycleTimes, cycleCurrents, linewidth = 2.0)
         plt.title('Change in Current on Channel %d During Cycle %d' % (channel, cycle))
         plt.xlabel('Time (hr)')
@@ -547,8 +610,9 @@ def plotCurrentVsTime(channel, cycle):
     plt.close()
 
 # Plots current vs time for all the cycles on the input channel
-def plotAllCyclesCurrentVsTime(channel):
-    plt.plot(times, channels[channel], linewidth = 2.0)
+def plotAllCyclesCurrentVsTime(channel,fileNum = 1):
+    fileNum -= 1
+    plt.plot(times[fileNum], channels[fileNum][channel], linewidth = 2.0)
     plt.title('Change in Current on Channel %d During each Cycle' % channel)
     plt.xlabel('Time (hr)')
     plt.ylabel('Current (\u03BCA)')
@@ -556,7 +620,8 @@ def plotAllCyclesCurrentVsTime(channel):
     plt.close()
 
 # Plots the voltage vs capacity for the input channel during the input cycle
-def plotVoltsVsCapacity(channel, cycle):
+def plotVoltsVsCapacity(channel, cycle = 1, fileNum = 1):
+    fileNum -= 1
     chargeCapacities = []
     chargeVoltages = []
     dischargeCapacities = []
@@ -564,22 +629,22 @@ def plotVoltsVsCapacity(channel, cycle):
     plt.figure(1)
     ax = plt.subplot(111)
     
-    if(mass[channel] == 0.0):
-        mass[channel] = float(input('Enter the sample mass for channel %d in grams: ' % channel))
+    if(mass[fileNum][channel] == 0.0):
+        mass[fileNum][channel] = float(input('Enter the sample mass for channel %d in grams: ' % channel))
     
     # Calculates specific capacity for the charge and discharge cycles and appends those
     # values to the cycleCapacities list and appends voltages during those cycles to the
     # cycleVoltages list
-    if 2*cycle in cycles:
-        for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle)):
-            if(cycles[i] == 2*cycle - 1):
-                if(i != len(cycles) - 1):
-                    chargeCapacities.append(((0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i]))/mass[channel])/1000.0)
-                chargeVoltages.append(voltages[i])
+    if 2*cycle in cycles[fileNum]:
+        for i in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
+            if(cycles[fileNum][i] == 2*cycle - 1):
+                if(i != len(cycles[fileNum]) - 1):
+                    chargeCapacities.append(((0.5*(channels[fileNum][channel][i] + channels[fileNum][channel][i+1])*(times[fileNum][i+1] - times[fileNum][i]))/mass[fileNum][channel])/1000.0)
+                chargeVoltages.append(voltages[fileNum][i])
             else:
-                if(i != len(cycles) - 1):
-                    dischargeCapacities.append(((0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i]))/mass[channel])/1000.0)
-                dischargeVoltages.append(voltages[i])
+                if(i != len(cycles[fileNum]) - 1):
+                    dischargeCapacities.append(((0.5*(channels[fileNum][channel][i] + channels[fileNum][channel][i+1])*(times[fileNum][i+1] - times[fileNum][i]))/mass[fileNum][channel])/1000.0)
+                dischargeVoltages.append(voltages[fileNum][i])
         chargePlot, = ax.plot(chargeCapacities, chargeVoltages, 'b', linewidth = 2.0, label = 'Charge')
         dischargePlot, = ax.plot(dischargeCapacities, dischargeVoltages, 'r', linewidth = 2.0, label = 'Discharge')
         box = ax.get_position()
@@ -589,10 +654,10 @@ def plotVoltsVsCapacity(channel, cycle):
         plt.xlabel('Specific Capacity (mAh/g)')
         plt.ylabel('Voltage (V)')
     else:
-        for i in range(cycles.index(2*cycle-1), len(cycles) - cycles[::-1].index(2*cycle-1)):
-            if(i != len(cycles) - 1):
-                chargeCapacities.append(((0.5*(channels[channel][i] + channels[channel][i+1])*(times[i+1] - times[i]))/mass[channel])/1000.0)
-            chargeVoltages.append(voltages[i])
+        for i in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
+            if(i != len(cycles[fileNum]) - 1):
+                chargeCapacities.append(((0.5*(channels[fileNum][channel][i] + channels[fileNum][channel][i+1])*(times[fileNum][i+1] - times[fileNum][i]))/mass[fileNum][channel])/1000.0)
+            chargeVoltages.append(voltages[fileNum][i])
         chargePlot, = ax.plot(chargeCapacities, chargeVoltages, 'b', linewidth = 2.0, label = 'Charge')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
@@ -604,7 +669,8 @@ def plotVoltsVsCapacity(channel, cycle):
     plt.close()
 
 # Plots the charge and discharge capacities of the input channel for each cycle
-def plotCapacityVsCycle(channel):
+def plotCapacityVsCycle(channel, fileNum = 1):
+    fileNum -= 1
     chgCapacity = []
     dchgCapacity = []
     cycle = []
@@ -612,13 +678,13 @@ def plotCapacityVsCycle(channel):
     ax = plt.subplot(111)
     
     # Adds each cycle number to the cycle list
-    for i in range(1, int(max(cycles)/2) + 1):
+    for i in range(1, int(max(cycles[fileNum])/2) + 1):
         cycle.append(i)
         
     # Adds the capacity for each cycle to the cycleCapacity list
     for j in cycle:
-        charge = capacity(channel, j)['Charge capacity (mAh/g)']
-        discharge = capacity(channel, j)['Discharge capacity (mAh/g)']
+        charge = capacity(channel, j, fileNum+1)['Charge capacity (mAh/g)']
+        discharge = capacity(channel, j, fileNum+1)['Discharge capacity (mAh/g)']
         chgCapacity.append(charge)
         dchgCapacity.append(-1.0*discharge)
     chgplot, = ax.plot(cycle, chgCapacity, 'bo', label = 'Charge', ms = 4.0)
@@ -640,17 +706,18 @@ def plotCapacityVsCycle(channel):
     plt.close()   
 
 # Plots the charge capacity of the input channel for each cycle
-def plotChargeCapacityVsCycle(channel):
+def plotChargeCapacityVsCycle(channel, fileNum = 1):
+    fileNum -= 1
     cycleCapacity = []
     cycle = []
     
     # Adds each cycle number to the cycle list
-    for i in range(1, int(max(cycles)/2) + 1):
+    for i in range(1, int(max(cycles[fileNum])/2) + 1):
         cycle.append(i)
         
     # Adds the capacity for each cycle to the cycleCapacity list
     for j in cycle:
-        charge = capacity(channel, j)['Charge capacity (mAh/g)']
+        charge = capacity(channel, j, fileNum+1)['Charge capacity (mAh/g)']
         cycleCapacity.append(charge)
     plt.plot(cycle, cycleCapacity, 'bo', ms = 4.0)
 #     for value in cycle:
@@ -669,17 +736,18 @@ def plotChargeCapacityVsCycle(channel):
     plt.close()
 
 # Plots the discharge capacity of the input channel for each cycle
-def plotDischargeCapacityVsCycle(channel):
+def plotDischargeCapacityVsCycle(channel, fileNum = 1):
+    fileNum -= 1
     cycleCapacity = []
     cycle = []
     
     # Adds each cycle number to the cycle list
-    for i in range(1, int(max(cycles)/2) + 1):
+    for i in range(1, int(max(cycles[fileNum])/2) + 1):
         cycle.append(i)
         
     # Adds the capacity for each cycle to the cycleCapacity list
     for j in cycle:
-        discharge = capacity(channel, j)['Discharge capacity (mAh/g)']
+        discharge = capacity(channel, j, fileNum+1)['Discharge capacity (mAh/g)']
         cycleCapacity.append(-1.0*discharge)
     plt.plot(cycle, cycleCapacity, 'ro', ms = 4.0)
 #     for value in cycle:
@@ -701,26 +769,26 @@ print('\nAvailable functions:')
 print('newFile()')
 print('setMass(channel)')
 print('export()')
-print('capacity(channel, cycle)')
-print('capacity64(cycle)')
+print('capacity(channel, cycle = 1, fileNum = 1)')
+print('capacity64(cycle = 1, fileNum = 1)')
 print('capacityAllCycles(channel)')
 print('allCapacities()')
 print('averageVoltages(startTime, endTime)')
-print('resistances(cycle)')
+print('resistances(cycle = 1, fileNum = 1)')
 print('allResistances()')
-print('plotCurrentVsVolts(channel, cycle)')
+print('plotCurrentVsVolts(channel, cycle = 1, fileNum = 1)')
 print('plotCurrentVsVolts64(cycle)')
 print('plotAllCyclesCurrentVsVolts(channel)')
 print('plotAllCyclesCurrentVsVolts64()')
-print('plotVoltsVsCurrent(channel, cycle)')
-print('plotVoltsVsCurrent64(cycle)')
+print('plotVoltsVsCurrent(channel, cycle = 1, fileNum = 1)')
+print('plotVoltsVsCurrent64(cycle = 1, fileNum = 1)')
 print('plotAllCyclesVoltsVsCurrent(channel)')
 print('plotAllCyclesVoltsVsCurrent64(channel)')
-print('plotVoltsVsTime(cycle)')
+print('plotVoltsVsTime(cycle = 1, fileNum = 1)')
 print('plotAllCyclesVoltsVsTime()')
-print('plotCurrentVsTime(channel, cycle)')
+print('plotCurrentVsTime(channel, cycle = 1, fileNum = 1)')
 print('plotAllCyclesCurrentVsTime(channel)')
-print('plotVoltsVsCapacity(channel, cycle)')
+print('plotVoltsVsCapacity(channel, cycle = 1, fileNum = 1)')
 print('plotCapacityVsCycle(channel)')
 print('plotChargeCapacityVsCycle(channel)')
 print('plotDischargeCapacityVsCycle(channel)\n')
@@ -738,8 +806,8 @@ newFile()
 # resistances(1)
 # plotVoltsVsCurrent(59, 1)
 # plotVoltsVsCurrent64(1)
-# plotCurrentVsVolts(59,1)
-# plotCurrentVsVolts64(2)
+# plotCurrentVsVolts(59,3.1, 4.5)
+# plotCurrentVsVolts64(1)
 # plotAllCyclesCurrentVsVolts(1)
 # plotAllCyclesCurrentVsVolts64()
 # plotAllCyclesVoltsVsCurrent64()

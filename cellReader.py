@@ -433,7 +433,7 @@ def plotVoltageWindowCycleWindow(vMin, vMax, cycle1, cycle2, fileNum = 1):
     plt.show()
     
 # Plots the 5 point moving average of the derivative of specific capacity as a function voltage for one cycle
-def plotdQVsVolts(cycle = 1, fileNum = 1):
+def plotdQVsVolts(boxcar = 5, cycle = 1, fileNum = 1):
     fileNum -= 1
     dQ = []
     usedVoltages = []
@@ -454,7 +454,7 @@ def plotdQVsVolts(cycle = 1, fileNum = 1):
             index = i             
     
     # Calculates the moving average with every 5 points
-    avg = np.ones(5)/5
+    avg = np.ones(boxcar)/boxcar
     y_avg = np.convolve(dQ, avg, 'same')
     plt.xlabel('Voltage (V)', fontsize = 'x-large')
     plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
@@ -463,7 +463,7 @@ def plotdQVsVolts(cycle = 1, fileNum = 1):
     plt.show()
     
 # Plots dQ vs Voltage for the cycles given as inputs
-def plotdQCycleWindow(cycle1, cycle2, fileNum = 1):
+def plotdQCycleWindow(cycle1, cycle2, boxcar = 5, fileNum = 1):
     fileNum -= 1
     dQ = []
     usedVoltages = []
@@ -484,7 +484,7 @@ def plotdQCycleWindow(cycle1, cycle2, fileNum = 1):
             index = i             
      
     # Calculates the moving average with every 5 points
-    avg = np.ones(5)/5
+    avg = np.ones(boxcar)/boxcar
     y_avg = np.convolve(dQ, avg, 'same')
     plt.xlabel('Voltage (V)', fontsize = 'x-large')
     plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
@@ -493,7 +493,7 @@ def plotdQCycleWindow(cycle1, cycle2, fileNum = 1):
     plt.show()
     
 # Plots the 5 point moving average of the derivative of specific capacity as a function voltage for all the cycles
-def plotAllCyclesdQVsVolts(fileNum = 1):
+def plotAllCyclesdQVsVolts(boxcar = 5, fileNum = 1):
     fileNum -= 1
     dQ = []
     usedVoltages = []
@@ -514,7 +514,7 @@ def plotAllCyclesdQVsVolts(fileNum = 1):
             index = i
 
     # Calculates the moving average with every 5 points
-    avg = np.ones(5)/5
+    avg = np.ones(boxcar)/boxcar
     y_avg = np.convolve(dQ, avg, 'same')
     plt.xlabel('Voltage (V)', fontsize = 'x-large')
     plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
@@ -522,7 +522,8 @@ def plotAllCyclesdQVsVolts(fileNum = 1):
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
     plt.show()
     
-def plotAllFilesdQVsVolts(cycle = 1):
+# Plots dQ vs voltage for all loaded files for the input cycle
+def plotAllFilesdQVsVolts(boxcar = 5, cycle = 1):
     for fileNum in range(len(cycles)):
         dQ = []
         usedVoltages = []
@@ -543,7 +544,7 @@ def plotAllFilesdQVsVolts(cycle = 1):
                 index = i             
         
         # Calculates the moving average with every 5 points
-        avg = np.ones(5)/5
+        avg = np.ones(boxcar)/boxcar
         y_avg = np.convolve(dQ, avg, 'same')
         plt.xlabel('Voltage (V)', fontsize = 'x-large')
         plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
@@ -796,6 +797,7 @@ def plotCapacityVsRate():
     plt.xlim((9, 1250))
     plt.show()
     
+# Plots the first 10 discharge capacities vs the rate the cell was run at
 def plotDischargeVsRate():
     for file in range(0, numFiles - 1, 7):
         dchg = []
@@ -847,10 +849,10 @@ print('plotVoltageWindowCycleWindow(vMin, vMax, cycle1, cycle2, fileNum = 1)')
 print('plotVoltageWindow(vMin, vMax, cycle = 1, fileNum = 1)')
 print('plotAllCyclesVoltageWindow(vMin, vMax, fileNum = 1)')
 print('plotAllFilesVoltageWindow(vMin, vMax, cycle = 1)')
-print('plotdQVsVolts(cycle = 1, fileNum = 1)')
-print('plotdQCycleWindow(cycle1, cycle2, fileNum = 1)')
-print('plotAllCyclesdQVsVolts(fileNum = 1)')
-print('plotAllFilesdQVsVolts(cycle = 1, fileNum = 1)')
+print('plotdQVsVolts(boxcar = 5, cycle = 1, fileNum = 1)')
+print('plotdQCycleWindow(cycle1, cycle2, boxcar = 5, fileNum = 1)')
+print('plotAllCyclesdQVsVolts(boxcar = 5, fileNum = 1)')
+print('plotAllFilesdQVsVolts(boxcar = 5, cycle = 1)')
 print('plotCapacityVsCycle(fileNum = 1)')
 print('plotChargeCapacityVsCycle(fileNum = 1)')
 print('plotDischargeCapacityVsCycle(fileNum = 1)')
@@ -866,7 +868,7 @@ print('plot(fileNum = 1)\n')
 newFile()
 # plotVoltageWindowCycleWindow(3.5, 4.2, 1, 13)
 # plotAllCyclesVoltageWindow(2.3, 6)
-# plotVoltsVsCapacityCycleWindow(1, 3)
+# plotVoltsVsCapacityCycleWindow(1, 12)
 # plotAllFilesVoltsVsCapacity(1)
 # plotAllCyclesVoltsVsCapacity(1)
 # plotConnectedVoltsVsCapacity(1)
@@ -874,13 +876,13 @@ newFile()
 # plotVoltageWindow(3.5,4.1)
 # plotAllFilesVoltageWindow(3.5,4.1)
 # plot()
-# plotAllCyclesdQVsVolts()
-# plotdQCycleWindow(1,2)
-# plotAllFilesdQVsVolts(1)
+# plotAllCyclesdQVsVolts(5)
+# plotdQCycleWindow(1,2, 5)
+# plotAllFilesdQVsVolts(5, 1)
 # plotCapacityVsRate()
 # plotDischargeVsRate()
 # plotAllFilesCapacityVsCycle()
-# plotdQVsVolts(2)
+# plotdQVsVolts(20, 2, 1)
 # cellInfo(1)
 # setMass(1)
 # plotChargeCapacityVsCycle(1)
