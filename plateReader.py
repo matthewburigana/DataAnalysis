@@ -1,6 +1,6 @@
 import csv
 from itertools import islice
-from matplotlib import rc, rcParams
+from matplotlib import rc
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -322,6 +322,7 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
                 chargeCurrents.append(channels[fileNum][i][j])
             rc('font', weight = 'bold')
             plt.tick_params('x', labelbottom = False)
+            plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -330,6 +331,8 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
+            if(i <= 8):
+                plt.tick_params('y', labelleft = True)
         else:
             for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
                 if(cycles[fileNum][j] == 2*cycle - 1):
@@ -341,6 +344,7 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
             plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
             plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 1.75, label = 'Discharge')
             plt.tick_params('x', labelbottom = False)
+            plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -349,6 +353,8 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
+            if(i <= 8):
+                plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
 
@@ -391,6 +397,7 @@ def plotAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1):
         ax.title.set_visible(False)
         plt.plot(voltages[fileNum], channels[fileNum][i], 'b', linewidth = 1.75)
         plt.tick_params('x', labelbottom = False)
+        plt.tick_params('y', labelleft = False)
         plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
         ax.spines['top'].set_linewidth(1.5)
         ax.spines['right'].set_linewidth(1.5)
@@ -399,6 +406,8 @@ def plotAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1):
         plt.xlim((xMin, xMax))
         if(i%8 == 0):
             plt.tick_params('x', labelbottom = True)
+        if(i <= 8):
+            plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
     
@@ -422,7 +431,7 @@ def plotNormalizedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fil
     if cycle*2 not in cycles[fileNum]:
         for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
             chargeVoltages.append(voltages[fileNum][i])
-            chargeCurrents.append(channels[fileNum][channel][i]/mass[fileNum][channel])
+            chargeCurrents.append(channels[fileNum][channel][i]/(1000*mass[fileNum][channel]))
         chargePlot, = plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 2.0, label = 'Charge')
         dischargePlot, = plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 2.0, label = 'Discharge')
         
@@ -432,17 +441,17 @@ def plotNormalizedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fil
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
         plt.title('Current on Channel %d During Cycle %d' % (channel, cycle))
         plt.xlabel('Voltage (V)')
-        plt.ylabel('Current (\u03BCA/g)')
+        plt.ylabel('Current (mA/g)')
         plt.tick_params(direction='in')
         plt.xlim((xMin, xMax))
     else:
         for i in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
             if(cycles[fileNum][i] == 2*cycle - 1):
                 chargeVoltages.append(voltages[fileNum][i])
-                chargeCurrents.append(channels[fileNum][channel][i]/mass[fileNum][channel])
+                chargeCurrents.append(channels[fileNum][channel][i]/(1000*mass[fileNum][channel]))
             else:
                 dischargeVoltages.append(voltages[fileNum][i])
-                dischargeCurrents.append(channels[fileNum][channel][i]/mass[fileNum][channel])
+                dischargeCurrents.append(channels[fileNum][channel][i]/(1000*mass[fileNum][channel]))
          
     # Plots the charge currents vs charge voltages in blue then the discharge currents vs 
     # discharge voltages in red
@@ -455,7 +464,7 @@ def plotNormalizedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fil
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1,1), fontsize = 'small')
         plt.title('Current on Channel %d During Cycle %d' % (channel, cycle), fontsize = 'xx-large', weight = 'bold')
         plt.xlabel('Voltage (V)', fontsize = 'x-large', weight = 'bold')
-        plt.ylabel('Current (\u03BCA/g)', fontsize = 'x-large', weight = 'bold')
+        plt.ylabel('Current (mA/g)', fontsize = 'x-large', weight = 'bold')
         plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
         plt.xlim((xMin, xMax))
     plt.show()
@@ -464,7 +473,7 @@ def plotNormalizedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fil
 def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
     fileNum -= 1
     rc('font', weight = 'bold')
-    plt.figure(1)   
+    plt.figure(1)
 
     # Loops through the 64 channels and adds each new plot as a subplot to figure 1,
     # using the same plotting logic as the plot function    
@@ -495,9 +504,10 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
         if cycle*2 not in cycles[fileNum]:
             for j in range(cycles[fileNum].index(2*cycle-1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle-1)):
                 chargeVoltages.append(voltages[fileNum][j])
-                chargeCurrents.append(channels[fileNum][i][j]/mass[fileNum][i])
+                chargeCurrents.append(channels[fileNum][i][j]/(1000*mass[fileNum][i]))
             rc('font', weight = 'bold')
             plt.tick_params('x', labelbottom = False)
+            plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -506,17 +516,20 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
+            if(i <= 8):
+                plt.tick_params('y', labelleft = True)
         else:
             for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
                 if(cycles[fileNum][j] == 2*cycle - 1):
                     chargeVoltages.append(voltages[fileNum][j])
-                    chargeCurrents.append(channels[fileNum][i][j]/mass[fileNum][i])
+                    chargeCurrents.append(channels[fileNum][i][j]/(1000*mass[fileNum][i]))
                 else:
                     dischargeVoltages.append(voltages[fileNum][j])
-                    dischargeCurrents.append(channels[fileNum][i][j]/mass[fileNum][i])
+                    dischargeCurrents.append(channels[fileNum][i][j]/(1000*mass[fileNum][i]))
             plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
             plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 1.75, label = 'Discharge')
             plt.tick_params('x', labelbottom = False)
+            plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -525,6 +538,8 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
+            if(i <= 8):
+                plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
 
@@ -533,11 +548,11 @@ def plotAllCyclesNormalizedCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5, fileN
     rc('font', weight = 'bold')
     channelCurrents = []
     for current in channels[fileNum][channel]:
-        channelCurrents.append(current/mass[fileNum][channel])
+        channelCurrents.append(current/(1000*mass[fileNum][channel]))
     plt.plot(voltages[fileNum], channelCurrents, 'b', linewidth = 2.0)
     plt.title('Current on Channel %d During each Cycle' % channel, fontsize = 'xx-large', weight = 'bold')
     plt.xlabel('Voltage (V)', fontsize = 'x-large', weight = 'bold')
-    plt.ylabel('Current (\u03BCA/g)', fontsize = 'x-large', weight = 'bold')
+    plt.ylabel('Current (mA/g)', fontsize = 'x-large', weight = 'bold')
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
     plt.xlim((xMin, xMax))
     plt.show()
@@ -566,11 +581,12 @@ def plotAllCyclesNormalizedCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1)
             loc = i + (7*(i-64))
         channelCurrents = []
         for current in channels[fileNum][i]:
-            channelCurrents.append(current/mass[fileNum][i])
+            channelCurrents.append(current/(1000*mass[fileNum][i]))
         ax = plt.subplot(8, 8, loc, title = 'Channel %d' % i)
         ax.title.set_visible(False)
         plt.plot(voltages[fileNum], channelCurrents, 'b', linewidth = 1.75)
         plt.tick_params('x', labelbottom = False)
+        plt.tick_params('y', labelleft = False)
         plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
         ax.spines['top'].set_linewidth(1.5)
         ax.spines['right'].set_linewidth(1.5)
@@ -579,6 +595,8 @@ def plotAllCyclesNormalizedCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1)
         plt.xlim((xMin, xMax))
         if(i%8 == 0):
             plt.tick_params('x', labelbottom = True)
+        if(i <= 8):
+            plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
     
@@ -971,6 +989,14 @@ print('plotChargeCapacityVsCycle(channel)')
 print('plotDischargeCapacityVsCycle(channel)\n')
 
 newFile()
+# plotCurrentVsVolts(1)
+# plotCurrentVsVolts64()
+# plotAllCyclesCurrentVsVolts(1)
+# plotAllCyclesCurrentVsVolts64()
+# plotNormalizedCurrentVsVolts(1)
+# plotNormalizedCurrentVsVolts64()
+# plotAllCyclesNormalizedCurrentVsVolts(1)
+# plotAllCyclesNormalizedCurrentVsVolts64()
 # allCapacities()
 # allResistances()
 # setMass(1)
@@ -983,14 +1009,6 @@ newFile()
 # resistances(1)
 # plotVoltsVsCurrent(59, 1)
 # plotVoltsVsCurrent64(1)
-# plotCurrentVsVolts(1)
-# plotCurrentVsVolts64()
-# plotAllCyclesCurrentVsVolts(1)
-# plotAllCyclesCurrentVsVolts64()
-# plotNormalizedCurrentVsVolts(1)
-# plotNormalizedCurrentVsVolts64()
-# plotAllCyclesNormalizedCurrentVsVolts(1)
-# plotAllCyclesNormalizedCurrentVsVolts64()
 # plotAllCyclesVoltsVsCurrent64()
 # plotVoltsVsTime(1)
 # plotAllCyclesVoltsVsTime()
