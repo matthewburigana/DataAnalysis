@@ -16,6 +16,12 @@ dchgCapacities = []
 resistance = []
 meanResistances = []
 stdevResistances = []
+xVal = []
+yVal = []
+zVal = []
+xName = ''
+yName = ''
+zName = ''
 
 # A mass dictionary for the mass of each channel
 # mass = {x: 0.0 for x in range(1, 65)}
@@ -43,6 +49,9 @@ def newFile():
     resistance.append([])
     meanResistances.append([])
     stdevResistances.append([])
+    xVal.append([])
+    yVal.append([])
+    zVal.append([])
     mass.append({x: 0.0 for x in range(1, 65)})
     channels.append({x: [] for x in range(1, 65)})  
             
@@ -78,7 +87,8 @@ def newFile():
                     mass[numFiles][i] = float(row[i+1])
                 break
     numFiles += 1
-            
+
+# Clears all stored data     
 def clear():
     global numFiles
     cycles.clear()
@@ -93,6 +103,9 @@ def clear():
     resistance.clear()
     meanResistances.clear()
     stdevResistances.clear()
+    xVal.clear()
+    yVal.clear()
+    zVal.clear()
     numFiles = 0
     
 # Set the mass of the sample on a channel
@@ -109,8 +122,8 @@ def setMass(channel, fileNum = 1):
 def export(fileNum = 1):
     fileNum -= 1
     outputFile = input('Enter the export file name: ') + '.csv'
-    allCapacities()
-    allResistances()
+    allCapacities(fileNum+1)
+    allResistances(fileNum+1)
     with open(filepath + outputFile, 'w', newline = '') as output:
         writer = csv.writer(output, dialect = 'excel')
         channel = []
@@ -127,6 +140,62 @@ def export(fileNum = 1):
             writer.writerow(['', 'Mean Resistance'] + [meanResistances[fileNum][cycle-1]])
             writer.writerow(['', 'Standard Deviation'] + [stdevResistances[fileNum][cycle-1]])
         
+# Takes phase diagram data then exports the data with capacities for each cycle attached
+def phaseDiagramExport(fileNum = 1):
+    fileNum -= 1
+    phaseFile = input('Enter the phase diagram file name: ') + '.csv'
+    
+    header = []
+    body = []
+    global xName
+    global yName
+    global zName
+    
+    # Reads phase diagram data in the data structures
+    with open(filepath + phaseFile, 'r') as inputData:
+        reader = csv.reader(inputData, dialect = 'excel')
+        rowNum = 1
+        for row in reader:
+            if (rowNum == 1):
+                header.append(row[0])
+                header.append(row[1])
+                header.append(row[2])
+                rowNum = 0
+            else:
+                if (len(row) == 3):
+                    xVal[fileNum].append(float(row[0]))
+                    yVal[fileNum].append(float(row[1]))
+                    zVal[fileNum].append(float(row[2]))
+                else:
+                    xVal[fileNum].append(float(row[0]))
+                    yVal[fileNum].append(float(row[1]))
+                    zVal[fileNum].append(float(row[2]))
+    
+    # Adds the data that will go into the header
+    allCapacities(fileNum+1)     
+    for cycle in range(int(max(cycles[fileNum])/2)):
+        header.append('Cycle %d Charge Capacity (mAh/g)' % (cycle+1))
+        header.append('Cycle %d Discharge Capacity (mAh/g)' % (cycle+1))
+
+    # Appends phase data and capacities to the body data
+    for channel in range(64):
+        body.append([])
+        body[channel].append(xVal[fileNum][channel])
+        body[channel].append(yVal[fileNum][channel])
+        body[channel].append(zVal[fileNum][channel])
+        for i in range(int(max(cycles[fileNum])/2)):
+            body[channel].append(chgCapacities[fileNum][i][channel])
+            body[channel].append(dchgCapacities[fileNum][i][channel])
+
+    # Opens the phase diagram file to write the header and body to it
+    with open(filepath + phaseFile, 'w', newline = '') as outputData:
+        writer = csv.writer(outputData, dialect = 'excel')
+        writer.writerow(header)
+         
+        for j in range(64):
+            writer.writerow(body[j])
+        
+
 # Calculates the charge and discharge capacity of a channel during the specified cycle
 # between the minimum and maximum voltages. Integrates dQ = Idt
 def capacity(channel, cycle = 1, fileNum = 1):
@@ -322,7 +391,7 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
                 chargeCurrents.append(channels[fileNum][i][j])
             rc('font', weight = 'bold')
             plt.tick_params('x', labelbottom = False)
-            plt.tick_params('y', labelleft = False)
+            # plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -331,8 +400,8 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
-            if(i <= 8):
-                plt.tick_params('y', labelleft = True)
+#             if(i <= 8):
+#                 plt.tick_params('y', labelleft = True)
         else:
             for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
                 if(cycles[fileNum][j] == 2*cycle - 1):
@@ -344,7 +413,7 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
             plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
             plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 1.75, label = 'Discharge')
             plt.tick_params('x', labelbottom = False)
-            plt.tick_params('y', labelleft = False)
+#             plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -353,8 +422,8 @@ def plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
-            if(i <= 8):
-                plt.tick_params('y', labelleft = True)
+#             if(i <= 8):
+#                 plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
 
@@ -397,7 +466,7 @@ def plotAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1):
         ax.title.set_visible(False)
         plt.plot(voltages[fileNum], channels[fileNum][i], 'b', linewidth = 1.75)
         plt.tick_params('x', labelbottom = False)
-        plt.tick_params('y', labelleft = False)
+#         plt.tick_params('y', labelleft = False)
         plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
         ax.spines['top'].set_linewidth(1.5)
         ax.spines['right'].set_linewidth(1.5)
@@ -406,10 +475,22 @@ def plotAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1):
         plt.xlim((xMin, xMax))
         if(i%8 == 0):
             plt.tick_params('x', labelbottom = True)
-        if(i <= 8):
-            plt.tick_params('y', labelleft = True)
+#         if(i <= 8):
+#             plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
+    
+def plotAllFilesCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5):
+    pass
+
+def plotAllFilesCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5):
+    pass
+
+def plotAllFilesAllCyclesCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5):
+    pass
+
+def plotAllFilesAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5):
+    pass
     
 def plotNormalizedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1):
     fileNum -= 1
@@ -507,7 +588,7 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
                 chargeCurrents.append(channels[fileNum][i][j]/(1000*mass[fileNum][i]))
             rc('font', weight = 'bold')
             plt.tick_params('x', labelbottom = False)
-            plt.tick_params('y', labelleft = False)
+#             plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -516,8 +597,8 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
-            if(i <= 8):
-                plt.tick_params('y', labelleft = True)
+#             if(i <= 8):
+#                 plt.tick_params('y', labelleft = True)
         else:
             for j in range(cycles[fileNum].index(2*cycle - 1), len(cycles[fileNum]) - cycles[fileNum][::-1].index(2*cycle)):
                 if(cycles[fileNum][j] == 2*cycle - 1):
@@ -529,7 +610,7 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
             plt.plot(chargeVoltages, chargeCurrents, 'b', linewidth = 1.75, label = 'Charge')
             plt.plot(dischargeVoltages, dischargeCurrents, 'r', linewidth = 1.75, label = 'Discharge')
             plt.tick_params('x', labelbottom = False)
-            plt.tick_params('y', labelleft = False)
+#             plt.tick_params('y', labelleft = False)
             plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
             ax.spines['top'].set_linewidth(1.5)
             ax.spines['right'].set_linewidth(1.5)
@@ -538,8 +619,8 @@ def plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 
             plt.xlim((xMin, xMax))
             if(i%8 == 0):
                 plt.tick_params('x', labelbottom = True)
-            if(i <= 8):
-                plt.tick_params('y', labelleft = True)
+#             if(i <= 8):
+#                 plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
 
@@ -586,7 +667,7 @@ def plotAllCyclesNormalizedCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1)
         ax.title.set_visible(False)
         plt.plot(voltages[fileNum], channelCurrents, 'b', linewidth = 1.75)
         plt.tick_params('x', labelbottom = False)
-        plt.tick_params('y', labelleft = False)
+#         plt.tick_params('y', labelleft = False)
         plt.tick_params(direction='in', labelsize = 'large', length = 5.0, width = 1.5, top = True, right = True)
         ax.spines['top'].set_linewidth(1.5)
         ax.spines['right'].set_linewidth(1.5)
@@ -595,10 +676,22 @@ def plotAllCyclesNormalizedCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1)
         plt.xlim((xMin, xMax))
         if(i%8 == 0):
             plt.tick_params('x', labelbottom = True)
-        if(i <= 8):
-            plt.tick_params('y', labelleft = True)
+#         if(i <= 8):
+#             plt.tick_params('y', labelleft = True)
     plt.show()
     plt.close()
+    
+def plotAllFilesNormailzedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5):
+    pass
+
+def plotAllFilesNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5):
+    pass
+
+def plotAllFilesAllCyclesNormalizedCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5):
+    pass
+
+def plotAllFilesAllCyclesNormalizedCurrentVsVolts64(xMin = 3.1, xMax = 4.5):
+    pass
     
 # Plots voltage as a function of current for the input channel during the input cycle
 def plotVoltsVsCurrent(channel, cycle = 1, fileNum = 1):
@@ -962,40 +1055,46 @@ def plotDischargeCapacityVsCycle(channel, fileNum = 1):
     
 print('\nAvailable functions:')
 print('newFile()')
-print('setMass(channel)')
-print('export()')
+print('setMass(channel, fileNum = 1)')
+print('export(fileNum = 1)')
+print('phaseDiagramExport(fileNum = 1)')
 print('capacity(channel, cycle = 1, fileNum = 1)')
 print('capacity64(cycle = 1, fileNum = 1)')
-print('capacityAllCycles(channel)')
+print('capacityAllCycles(channel, fileNum = 1)')
 print('allCapacities()')
-print('averageVoltages(startTime, endTime)')
+print('averageVoltages(startTime, endTime, fileNum = 1)')
 print('resistances(cycle = 1, fileNum = 1)')
 print('allResistances()')
-print('plotCurrentVsVolts(channel, cycle = 1, fileNum = 1)')
-print('plotCurrentVsVolts64(cycle)')
-print('plotAllCyclesCurrentVsVolts(channel)')
-print('plotAllCyclesCurrentVsVolts64()')
+print('plotCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5, cycle = 1, fileNum = 1)')
+print('plotCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1')
+print('plotAllCyclesCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5, fileNum = 1)')
+print('plotAllCyclesCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1)')
+print('plotNormalizedCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1)')
+print('plotNormalizedCurrentVsVolts64(cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1)')
+print('plotAllCyclesNormalizedCurrentVsVolts(channel, xMin = 3.1, xMax = 4.5, fileNum = 1)')
+print('plotAllCyclesNormalizedCurrentVsVolts64(xMin = 3.1, xMax = 4.5, fileNum = 1)')
 print('plotVoltsVsCurrent(channel, cycle = 1, fileNum = 1)')
 print('plotVoltsVsCurrent64(cycle = 1, fileNum = 1)')
-print('plotAllCyclesVoltsVsCurrent(channel)')
-print('plotAllCyclesVoltsVsCurrent64(channel)')
+print('plotAllCyclesVoltsVsCurrent(channel, fileNum = 1)')
+print('plotAllCyclesVoltsVsCurrent64(channel, fileNum = 1)')
 print('plotVoltsVsTime(cycle = 1, fileNum = 1)')
-print('plotAllCyclesVoltsVsTime()')
+print('plotAllCyclesVoltsVsTime(fileNum = 1)')
 print('plotCurrentVsTime(channel, cycle = 1, fileNum = 1)')
-print('plotAllCyclesCurrentVsTime(channel)')
+print('plotAllCyclesCurrentVsTime(channel, fileNum = 1)')
 print('plotVoltsVsCapacity(channel, cycle = 1, fileNum = 1)')
-print('plotCapacityVsCycle(channel)')
-print('plotChargeCapacityVsCycle(channel)')
-print('plotDischargeCapacityVsCycle(channel)\n')
+print('plotCapacityVsCycle(channel, fileNum = 1)')
+print('plotChargeCapacityVsCycle(channel, fileNum = 1)')
+print('plotDischargeCapacityVsCycle(channel, fileNum = 1)\n')
 
 newFile()
+# phaseDiagramExport(1)
 # plotCurrentVsVolts(1)
-# plotCurrentVsVolts64()
 # plotAllCyclesCurrentVsVolts(1)
-# plotAllCyclesCurrentVsVolts64()
 # plotNormalizedCurrentVsVolts(1)
-# plotNormalizedCurrentVsVolts64()
 # plotAllCyclesNormalizedCurrentVsVolts(1)
+# plotCurrentVsVolts64()
+# plotAllCyclesCurrentVsVolts64()
+# plotNormalizedCurrentVsVolts64()
 # plotAllCyclesNormalizedCurrentVsVolts64()
 # allCapacities()
 # allResistances()
