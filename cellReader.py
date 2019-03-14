@@ -35,7 +35,7 @@ numFiles = 0
 def newFile():
     global mass
     global numFiles
-    filename = input('Enter the CSV file name: ') + '.csv' 
+    filename = input('Enter the cell file name: ') + '.csv' 
     
     cycles.append([])
     voltages.append([])
@@ -273,7 +273,7 @@ def plotAllFilesVoltsVsCapacity(cycle = 1):
                 else:
                     cycleCapacities.append(-1 * sCapacities[fileNum][i] + lastCCap)
                 cycleVoltages.append(voltages[fileNum][i])
-            plt.plot(cycleCapacities, cycleVoltages, label='%.2f V - %.2f V' % (min(cycleVoltages), max(cycleVoltages)), linewidth=2.0)
+            plt.plot(cycleCapacities, cycleVoltages, label='File %d' % (fileNum+1), linewidth=2.0)
         plt.xlabel('Specific Capacity (mAh/g)', fontsize='x-large')
         plt.ylabel('Voltage (V)', fontsize='x-large')
         # plt.legend()
@@ -835,6 +835,11 @@ def plot(fileNum = 1):
     plotCapacityVsCycle(fileNum)
     plotAllFilesCapacityVsCycle()
     
+# Runs methods generating overlaid cycling curves for all entered files
+def overlay(boxcar = 5, cycle = 1):
+    plotAllFilesVoltsVsCapacity(cycle)
+    plotAllFilesdQVsVolts(boxcar, cycle)
+    
 print('\nAvailable Functions:')
 print('newFile()')
 print('clear()')
@@ -863,7 +868,8 @@ print('plotAllFilesCapacityVsCycle()')
 print('plotAllFilesEnergyVsCycle()')
 print('plotCapacityVsRate()')
 print('plotDischargeVsRate()')
-print('plot(fileNum = 1)\n')
+print('plot(fileNum = 1)')
+print('overlay(boxcar = 5, cycle = 1)\n')
 
 newFile()
 # plotVoltageWindowCycleWindow(3.5, 4.2, 1, 13)

@@ -3,7 +3,7 @@ import os
 from itertools import islice
 import matplotlib.pyplot as plt
 
-filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\PXRD\\'
+filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\Analysis\\PXRD\\'
  
 # Lists to store the x and y data to be fit
 xData = []
@@ -11,8 +11,7 @@ yData = []
 yFit= []
 numFiles = 0
 
-# Loads a new file and clears any previously stored data if there is any. regression is then
-# called on the desired function to be fit to the data. 
+# Loads a new file and clears any previously stored data if there is any.
 def newFile():
     desiredFile = input('Enter the CSV file name: ')
     if (desiredFile == ''):
@@ -24,8 +23,7 @@ def newFile():
         processor(desiredFile)
         plotXRD(numFiles)
         
-# Used by newFile() to process the file name passed to it and do a regression on the data
-# with the input function
+# Used by newFile() to process the file name passed to it.
 def processor(name):
     global numFiles
     
@@ -72,6 +70,23 @@ def plotXRD(fileNum = 1):
     plt.xlim(min(xData[fileNum]), max(xData[fileNum]))
     plt.show()
     
+# Plots PXRD data with the fit and difference of the experimental data and Rietica fit.
+def plotXRDError(fileNum = 1):
+    fileNum -= 1
+    error = []
+    plt.figure(1)
+    for i in range(len(yData[fileNum])):
+        error.append(yData[fileNum][i] - yFit[fileNum][i] + fileNum)
+    plt.plot(xData[fileNum], yData[fileNum], 'bo', ms = 1.5)
+    plt.plot(xData[fileNum], yFit[fileNum], 'r', linewidth = 1.5)
+    plt.plot(xData[fileNum], error, 'g', linewidth = 1.5)
+    plt.xlabel('Scattering Angle (deg.)', fontsize = 'x-large')
+    plt.ylabel('Intensity',  fontsize = 'x-large')
+    plt.tick_params('y', labelleft = False)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.xlim(min(xData[fileNum]), max(xData[fileNum]))
+    plt.show()
+    
 # Plots all loaded PXRD files as a stacked vertical plot. 
 def plotAllXRD():
     plt.figure(1)
@@ -96,6 +111,7 @@ print('\nAvailable Functions:')
 print('newFile()')
 print('clear()')
 print('plotXRD(fileNum = 1)')
+print('plotXRDError(fileNum = 1')
 print('plotAllXRD()\n')
 
 newFile()
