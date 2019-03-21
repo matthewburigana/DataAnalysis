@@ -255,33 +255,30 @@ def plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1):
     
 # Plots voltage vs capacity for all input files during the input cycle
 def plotAllFilesVoltsVsCapacity(cycle = 1):
-    if(numFiles > 10):
-            raise ValueError('plotAllFilesVoltsVsCapacity can only plot a maximum of 10 files.')
-    else:
-        # Loops through every file loaded
-        for fileNum in range(numFiles):
-            cycleCapacities = []
-            cycleVoltages = []
-            lastCCap = 0.0
-                
-            # Loops through every index of the input cycle, appending voltages to cycleVoltages
-            # and capacities to cycleCapacities using the same formula as plotConnectedVoltsVsCapacity
-            for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
-                if(currents[fileNum][i] > 0.0):
-                    cycleCapacities.append(sCapacities[fileNum][i])
-                    lastCCap = sCapacities[fileNum][i]
-                else:
-                    cycleCapacities.append(-1 * sCapacities[fileNum][i] + lastCCap)
-                cycleVoltages.append(voltages[fileNum][i])
-            plt.plot(cycleCapacities, cycleVoltages, label='File %d' % (fileNum+1), linewidth=2.0)
-        plt.xlabel('Specific Capacity (mAh/g)', fontsize='x-large')
-        plt.ylabel('Voltage (V)', fontsize='x-large')
-        # plt.legend()
-        plt.tick_params(direction='in', labelsize='large', length=5.0)
-        plt.show()
+    # Loops through every file loaded
+    for fileNum in range(numFiles):
+        cycleCapacities = []
+        cycleVoltages = []
+        lastCCap = 0.0
+            
+        # Loops through every index of the input cycle, appending voltages to cycleVoltages
+        # and capacities to cycleCapacities using the same formula as plotConnectedVoltsVsCapacity
+        for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
+            if(currents[fileNum][i] > 0.0):
+                cycleCapacities.append(sCapacities[fileNum][i])
+                lastCCap = sCapacities[fileNum][i]
+            else:
+                cycleCapacities.append(-1 * sCapacities[fileNum][i] + lastCCap)
+            cycleVoltages.append(voltages[fileNum][i])
+        plt.plot(cycleCapacities, cycleVoltages, label='File %d' % (fileNum+1), linewidth=2.0)
+    plt.xlabel('Specific Capacity (mAh/g)', fontsize='x-large')
+    plt.ylabel('Voltage (V)', fontsize='x-large')
+    # plt.legend()
+    plt.tick_params(direction='in', labelsize='large', length=5.0)
+    plt.show()
 
     
-# Plot voltage vs capacity for the voltages between vMin and Vmax of the specified cycle
+# Plot voltage vs capacity for the voltages between vMin and vMax of the specified cycle
 def plotVoltageWindow(vMin, vMax, cycle = 1, fileNum = 1):
     fileNum -= 1
     caps = []
@@ -448,10 +445,18 @@ def plotdQVsVolts(boxcar = 5, cycle = 1, fileNum = 1):
                 currentVolt = voltages[fileNum][i]
                 index = i
                 continue
-            dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
-            usedVoltages.append(currentVolt)
-            currentVolt = voltages[fileNum][i]
-            index = i             
+            
+            if(currents[fileNum][index] > 0 and voltages[fileNum][i] >= currentVolt + 0.005):
+                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                usedVoltages.append(currentVolt)
+                currentVolt = voltages[fileNum][i]
+                index = i 
+                
+            if(currents[fileNum][index] < 0 and voltages[fileNum][i] <= currentVolt - 0.005):
+                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                usedVoltages.append(currentVolt)
+                currentVolt = voltages[fileNum][i]
+                index = i      
     
     # Calculates the moving average with every 5 points
     avg = np.ones(boxcar)/boxcar
@@ -478,10 +483,18 @@ def plotdQCycleWindow(cycle1, cycle2, boxcar = 5, fileNum = 1):
                 currentVolt = voltages[fileNum][i]
                 index = i
                 continue
-            dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
-            usedVoltages.append(currentVolt)
-            currentVolt = voltages[fileNum][i]
-            index = i             
+            
+            if(currents[fileNum][index] > 0 and voltages[fileNum][i] >= currentVolt + 0.005):
+                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                usedVoltages.append(currentVolt)
+                currentVolt = voltages[fileNum][i]
+                index = i 
+                
+            if(currents[fileNum][index] < 0 and voltages[fileNum][i] <= currentVolt - 0.005):
+                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                usedVoltages.append(currentVolt)
+                currentVolt = voltages[fileNum][i]
+                index = i            
      
     # Calculates the moving average with every 5 points
     avg = np.ones(boxcar)/boxcar
@@ -508,10 +521,18 @@ def plotAllCyclesdQVsVolts(boxcar = 5, fileNum = 1):
                 currentVolt = voltages[fileNum][i]
                 index = i
                 continue
-            dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
-            usedVoltages.append(currentVolt)
-            currentVolt = voltages[fileNum][i]
-            index = i
+            
+            if(currents[fileNum][index] > 0 and voltages[fileNum][i] >= currentVolt + 0.005):
+                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                usedVoltages.append(currentVolt)
+                currentVolt = voltages[fileNum][i]
+                index = i 
+                
+            if(currents[fileNum][index] < 0 and voltages[fileNum][i] <= currentVolt - 0.005):
+                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                usedVoltages.append(currentVolt)
+                currentVolt = voltages[fileNum][i]
+                index = i
 
     # Calculates the moving average with every 5 points
     avg = np.ones(boxcar)/boxcar
@@ -538,10 +559,18 @@ def plotAllFilesdQVsVolts(boxcar = 5, cycle = 1):
                     currentVolt = voltages[fileNum][i]
                     index = i
                     continue
-                dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
-                usedVoltages.append(currentVolt)
-                currentVolt = voltages[fileNum][i]
-                index = i             
+                
+                if(currents[fileNum][index] > 0 and voltages[fileNum][i] >= currentVolt + 0.005):
+                    dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                    usedVoltages.append(currentVolt)
+                    currentVolt = voltages[fileNum][i]
+                    index = i 
+                
+                if(currents[fileNum][index] < 0 and voltages[fileNum][i] <= currentVolt - 0.005):
+                    dQ.append((sCapacities[fileNum][i] - sCapacities[fileNum][index])/(voltages[fileNum][i] - currentVolt))
+                    usedVoltages.append(currentVolt)
+                    currentVolt = voltages[fileNum][i]
+                    index = i             
         
         # Calculates the moving average with every 5 points
         avg = np.ones(boxcar)/boxcar
