@@ -177,7 +177,7 @@ def plotVoltsVsCapacity(cycle, fileNum = 1):
     plt.plot(cycleCapacities, cycleVoltages, linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots the voltage vs capacity for each cycle of the input file
@@ -186,7 +186,7 @@ def plotAllCyclesVoltsVsCapacity(fileNum = 1):
     plt.plot(sCapacities[fileNum], voltages[fileNum], linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
 
 # Plots voltage vs capacity as a connected line
@@ -215,7 +215,7 @@ def plotConnectedVoltsVsCapacity(fileNum = 1):
     plt.plot(caps, volts, linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots voltage vs capacity between the specified cycle window
@@ -250,7 +250,7 @@ def plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1):
             plt.plot(caps[cycle-cycle1], volts[cycle-cycle1], linewidth = 2.0, label = 'Cycle %d' % cycle)
         plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
         plt.ylabel('Voltage (V)', fontsize = 'x-large')
-        plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+        plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
         plt.show()
     
 # Plots voltage vs capacity for all input files during the input cycle
@@ -274,7 +274,7 @@ def plotAllFilesVoltsVsCapacity(cycle = 1):
     plt.xlabel('Specific Capacity (mAh/g)', fontsize='x-large')
     plt.ylabel('Voltage (V)', fontsize='x-large')
     # plt.legend()
-    plt.tick_params(direction='in', labelsize='large', length=5.0)
+    plt.tick_params(direction='in', labelsize='large', length=5.0, top = True, right = True)
     plt.show()
 
     
@@ -315,7 +315,7 @@ def plotVoltageWindow(vMin, vMax, cycle = 1, fileNum = 1):
     plt.plot(caps, volts, linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots every cycle of the input file between the specified voltages
@@ -350,7 +350,7 @@ def plotAllCyclesVoltageWindow(vMin, vMax, fileNum = 1):
     plt.plot(caps, volts, linewidth = 2.0)
     plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.ylabel('Voltage (V)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots the voltages vs capacity for all voltages between vMin and vMax for the input cycle
@@ -386,7 +386,7 @@ def plotAllFilesVoltageWindow(vMin, vMax, cycle = 1):
         plt.plot(caps, volts, linewidth = 2.0)
         plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
         plt.ylabel('Voltage (V)', fontsize = 'x-large')        
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots voltage vs capacity for voltages between vMin and vMax and cycles between cycle1 and cycle2
@@ -426,7 +426,7 @@ def plotVoltageWindowCycleWindow(vMin, vMax, cycle1, cycle2, fileNum = 1):
         plt.plot(caps[cycle-cycle1], volts[cycle-cycle1], linewidth = 2.0, label = 'Cycle %d' % cycle)
         plt.xlabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
         plt.ylabel('Voltage (V)', fontsize = 'x-large')        
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots the 5 point moving average of the derivative of specific capacity as a function voltage for one cycle
@@ -464,7 +464,7 @@ def plotdQVsVolts(boxcar = 5, cycle = 1, fileNum = 1):
     plt.xlabel('Voltage (V)', fontsize = 'x-large')
     plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
     plt.plot(usedVoltages, y_avg, linewidth = 2.0)
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots dQ vs Voltage for the cycles given as inputs
@@ -502,7 +502,7 @@ def plotdQCycleWindow(cycle1, cycle2, boxcar = 5, fileNum = 1):
     plt.xlabel('Voltage (V)', fontsize = 'x-large')
     plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
     plt.plot(usedVoltages, y_avg, linewidth = 2.0)
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots the 5 point moving average of the derivative of specific capacity as a function voltage for all the cycles
@@ -540,7 +540,7 @@ def plotAllCyclesdQVsVolts(boxcar = 5, fileNum = 1):
     plt.xlabel('Voltage (V)', fontsize = 'x-large')
     plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
     plt.plot(usedVoltages, y_avg, linewidth = 2.0)
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots dQ vs voltage for all loaded files for the input cycle
@@ -578,7 +578,7 @@ def plotAllFilesdQVsVolts(boxcar = 5, cycle = 1):
         plt.xlabel('Voltage (V)', fontsize = 'x-large')
         plt.ylabel('dQ/dV (mAh/Vg)', fontsize = 'x-large')
         plt.plot(usedVoltages, y_avg, linewidth = 2.0, label = 'File %d' % (i+1))
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()    
     
 # Plots the charge and discharge capacities at each cycle for the input file
@@ -615,7 +615,7 @@ def plotCapacityVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots charge capacity vs cycle number for the input file
@@ -635,7 +635,7 @@ def plotChargeCapacityVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Charge Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
 
 # Plots discharge capacity vs cycle number for the input file
@@ -654,7 +654,7 @@ def plotDischargeCapacityVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Discharge Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots charge and discharge energy vs cycle number for the input file
@@ -679,7 +679,7 @@ def plotEnergyVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Energy (Wh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
 
 # Plots the charge energy vs cycle number for the input file
@@ -698,7 +698,7 @@ def plotChargeEnergyVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Charge Energy (Wh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
 
 # Plots discharge energy vs cycle number for the input file
@@ -717,7 +717,7 @@ def plotDischargeEnergyVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Discharge Energy (Wh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots charge and discharge capacities of every file vs the cycle number
@@ -754,7 +754,7 @@ def plotAllFilesCapacityVsCycle():
         plt.xticks([x for x in range(1, maxCycle + 1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots charge and discharge energy of every file vs cycle number
@@ -787,7 +787,7 @@ def plotAllFilesEnergyVsCycle():
         plt.xticks([x for x in range(1, maxCycle + 1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Energy (Wh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
 # Plots the first charge and discharge capacities at C rates from C/20 to 5C
@@ -818,11 +818,12 @@ def plotCapacityVsRate():
             count += 1
         plt.xscale('log')
         plt.xticks([x for x in plotCurrents],[round(x, 0) for x in plotCurrents])
-        plt.plot(plotCurrent, chg, 'C%do' % (file/7 + 1), ms = 4.0,  fillstyle = 'none')
-        plt.plot(plotCurrent, dchg, 'C%do' % (file/7 + 1), ms = 4.0)
+        plt.plot(plotCurrent, chg, 'C%do' % (file/7 + 1), ms = 5.0,  fillstyle = 'none')
+        plt.plot(plotCurrent, dchg, 'C%do' % (file/7 + 1), ms = 5.0)
         plt.xlabel('Current (mA/g)', fontsize = 'x-large')
         plt.ylabel('Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.minorticks_off()
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.xlim((9, 1250))
     plt.show()
     
@@ -851,10 +852,11 @@ def plotDischargeVsRate():
             count += 1
         plt.xscale('log')
         plt.xticks([x for x in plotCurrents],[round(x, 0) for x in plotCurrents])
-        plt.plot(plotCurrent, dchg, 'C%do' % (file/7 + 1), ms = 4.0)
+        plt.plot(plotCurrent, dchg, 'C%do' % (file/7 + 1), ms = 5.0)
         plt.xlabel('Current (mA/g)', fontsize = 'x-large')
         plt.ylabel('Discharge Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.minorticks_off()
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.xlim((9, 1250))
     plt.show()
     
@@ -911,7 +913,7 @@ newFile()
 # plotVoltageWindow(3.5,4.1)
 # plotAllFilesVoltageWindow(3.5,4.1)
 # plot()
-# plotAllCyclesdQVsVolts(5)
+# plotAllCyclesdQVsVolts()
 # plotdQCycleWindow(1,2, 5)
 # plotAllFilesdQVsVolts(5, 1)
 # plotCapacityVsRate()
