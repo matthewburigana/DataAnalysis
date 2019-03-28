@@ -39,7 +39,7 @@ numFiles = 0
 def newFile():
     global numFiles
     filename = input('Enter the CSV file name: ') + '.csv'
-    massFile = input('Enter the mass file name: ') + '.csv'
+    massFile = input('Enter the mass file name: ')
 
     cycles.append([])
     times.append([])
@@ -80,6 +80,7 @@ def newFile():
         
     # Reads masses stored in the same file format as an exported file
     if(massFile != ''):
+        massFile = massFile + '.csv'
         with open(filepath + massFile, 'r') as masses:
             massRead = csv.reader(masses, dialect = 'excel')
             for row in islice(massRead, 1, None):
