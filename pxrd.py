@@ -64,9 +64,9 @@ def plotXRD(fileNum = 1):
         else:
             plt.plot(xData[fileNum], yData[fileNum], linewidth = 1.5)
     plt.xlabel('Scattering Angle (deg.)', fontsize = 'x-large')
-    plt.ylabel('Intensity',  fontsize = 'x-large')
+    plt.ylabel('Intensity (a.u.)',  fontsize = 'x-large')
     plt.tick_params('y', labelleft = False)
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.xlim(min(xData[fileNum]), max(xData[fileNum]))
     plt.show()
     
@@ -81,9 +81,9 @@ def plotXRDError(fileNum = 1):
     plt.plot(xData[fileNum], yFit[fileNum], 'r', linewidth = 1.5)
     plt.plot(xData[fileNum], error, 'g', linewidth = 1.5)
     plt.xlabel('Scattering Angle (deg.)', fontsize = 'x-large')
-    plt.ylabel('Intensity',  fontsize = 'x-large')
+    plt.ylabel('Intensity (a.u.)',  fontsize = 'x-large')
     plt.tick_params('y', labelleft = False)
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.xlim(min(xData[fileNum]), max(xData[fileNum]))
     plt.show()
     
@@ -93,9 +93,9 @@ def plotAllXRD():
     for i in range(len(xData)):
         plt.plot(xData[i], yData[i], linewidth = 1.5, label = 'File %d' % (i+1))
     plt.xlabel('Scattering Angle (deg.)', fontsize = 'x-large')
-    plt.ylabel('Intensity',  fontsize = 'x-large')
+    plt.ylabel('Intensity (a.u.)',  fontsize = 'x-large')
     plt.tick_params('y', labelleft = False)
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0)
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.xlim(min(xData[i]), max(xData[i]))
     plt.show()
     
