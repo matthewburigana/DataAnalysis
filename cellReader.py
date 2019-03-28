@@ -582,7 +582,7 @@ def plotAllFilesdQVsVolts(boxcar = 5, cycle = 1):
     plt.show()    
     
 # Plots the charge and discharge capacities at each cycle for the input file
-def plotCapacityVsCycle(fileNum = 1):
+def plotCapacityVsCycle(fileNum = 1, legend = False):
     fileNum -= 1
     cycle = []
     plt.figure(1)
@@ -603,9 +603,11 @@ def plotCapacityVsCycle(fileNum = 1):
 #                 ax.annotate(txt, (cycle[i], sCycleChgCap[fileNum][i]))
     
     # Shrinks the plot on the x axis and puts the legend outside the plot
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
-    ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+        
     if(len(cycle) > 10):
         ticks = []
         for x in cycle[4::5]:
@@ -654,6 +656,123 @@ def plotDischargeCapacityVsCycle(fileNum = 1):
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Discharge Capacity (mAh/g)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+    
+# Plots charge and discharge capacities of every file vs the cycle number
+def plotAllFilesCapacityVsCycle(legend = False):
+    cycle = []
+    plotted = []
+    plt.figure(1)
+    ax = plt.subplot(111)
+    
+    # Iterates through each file that has been loaded
+    for fileNum in range(len(cycles)):
+        cycle.clear()
+        for i in range(1, int(max(cycles[fileNum])) + 1):
+            cycle.append(i)
+        chargePlot, = ax.plot(cycle, sCycleChgCap[fileNum], 'C%do' % fileNum, label = 'File %d Charge' % (fileNum + 1), ms = 4.0,  fillstyle = 'none')
+        dischargePlot, = ax.plot(cycle, sCycleDchgCap[fileNum], 'C%do' % fileNum, label = 'File %d Discharge' % (fileNum + 1), ms = 4.0)
+        plotted.append(chargePlot)
+        plotted.append(dischargePlot)
+        
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+    
+    # Sets the ticks on the x axis based on the maximum number of cycles of all the files
+    maxCycle = 0
+    for i in range(numFiles):
+        if(max(cycles[i]) > maxCycle):
+            maxCycle = max(cycles[i])
+    if(maxCycle > 10):
+        ticks = []
+        for x in range(5, maxCycle + 1, 5):
+            ticks.append(x)
+        plt.xticks(ticks)
+    else:
+        plt.xticks([x for x in range(1, maxCycle + 1)])
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+    
+# Plots charge and discharge capacities for the cycles between cycle1 and cycle2 inclusive.
+def plotCapacityVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False):
+    fileNum -= 1
+    cycle = []
+    cycleChg = []
+    cycleDchg = []
+    plt.figure(1)
+    ax = plt.subplot(111)
+    
+    # Adds each cycle number to the cycle list
+    for i in range(cycle1, cycle2+1):
+        cycle.append(i)
+        cycleChg.append(sCycleChgCap[fileNum][i-1])
+        cycleDchg.append(sCycleDchgCap[fileNum][i-1])
+        
+    # Plots capacities vs cycles and labels each for the legend
+    chargePlot, = ax.plot(cycle, cycleChg, 'bo', label = 'Charge', ms = 4.0)
+    dischargePlot, = ax.plot(cycle, cycleDchg, 'ro', label = 'Discharge', ms = 4.0)
+    
+    # Shrinks the plot on the x axis and puts the legend outside the plot
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+        
+    if(len(cycle) > 10):
+        ticks = []
+        for x in cycle[::5]:
+            ticks.append(x)
+        plt.xticks(ticks)
+    else:
+        plt.xticks([x for x in range(cycle1, cycle2+1)])
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+
+# Plots charge and discharge capacities for cycles within the cycle range for all files, cycle2 inclusive
+def plotAllFilesCapacityVsCycleWindow(cycle1, cycle2, legend = False):
+    cycle = []
+    cycleChg = []
+    cycleDchg = []
+    plotted = []
+    plt.figure(1)
+    ax = plt.subplot(111)
+    
+    # Iterates through each file that has been loaded
+    for fileNum in range(numFiles):
+        cycle.clear()
+        cycleChg.clear()
+        cycleDchg.clear()
+        for i in range(cycle1, cycle2+1):
+            cycle.append(i)
+            cycleChg.append(sCycleChgCap[fileNum][i-1])
+            cycleDchg.append(sCycleDchgCap[fileNum][i-1])
+        chargePlot, = ax.plot(cycle, cycleChg, 'C%do' % fileNum, label = 'File %d Charge' % (fileNum + 1), ms = 4.0,  fillstyle = 'none')
+        dischargePlot, = ax.plot(cycle, cycleDchg, 'C%do' % fileNum, label = 'File %d Discharge' % (fileNum + 1), ms = 4.0)
+        plotted.append(chargePlot)
+        plotted.append(dischargePlot)
+        
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+    
+    # Sets the ticks on the x axis based on the maximum number of cycles of all the files
+    if(cycle2-cycle1+1 > 10):
+        ticks = []
+        for x in range(cycle1, cycle2 + 1, 5):
+            ticks.append(x)
+        plt.xticks(ticks)
+    else:
+        plt.xticks([x for x in range(cycle1, cycle2+1)])
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
@@ -720,43 +839,6 @@ def plotDischargeEnergyVsCycle(fileNum = 1):
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
-# Plots charge and discharge capacities of every file vs the cycle number
-def plotAllFilesCapacityVsCycle():
-    cycle = []
-    plotted = []
-    plt.figure(1)
-    ax = plt.subplot(111)
-    
-    # Iterates through each file that has been loaded
-    for fileNum in range(len(cycles)):
-        cycle.clear()
-        for i in range(1, int(max(cycles[fileNum])) + 1):
-            cycle.append(i)
-        chargePlot, = ax.plot(cycle, sCycleChgCap[fileNum], 'C%do' % fileNum, label = 'File %d Charge' % (fileNum + 1), ms = 4.0,  fillstyle = 'none')
-        dischargePlot, = ax.plot(cycle, sCycleDchgCap[fileNum], 'C%do' % fileNum, label = 'File %d Discharge' % (fileNum + 1), ms = 4.0)
-        plotted.append(chargePlot)
-        plotted.append(dischargePlot)
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
-    ax.legend(handles = plotted, loc = 2, bbox_to_anchor = (1 ,1), fontsize = 'small')
-    
-    # Sets the ticks on the x axis based on the maximum number of cycles of all the files
-    maxCycle = 0
-    for i in range(numFiles):
-        if(max(cycles[i]) > maxCycle):
-            maxCycle = max(cycles[i])
-    if(maxCycle > 10):
-        ticks = []
-        for x in range(5, maxCycle + 1, 5):
-            ticks.append(x)
-        plt.xticks(ticks)
-    else:
-        plt.xticks([x for x in range(1, maxCycle + 1)])
-    plt.xlabel('Cycle Number', fontsize = 'x-large')
-    plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
-    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
-    plt.show()
-    
 # Plots charge and discharge energy of every file vs cycle number
 def plotAllFilesEnergyVsCycle():
     cycle = []
@@ -818,8 +900,8 @@ def plotCapacityVsRate():
             count += 1
         plt.xscale('log')
         plt.xticks([x for x in plotCurrents],[round(x, 0) for x in plotCurrents])
-        plt.plot(plotCurrent, chg, 'C%do' % (file/7 + 1), ms = 5.0,  fillstyle = 'none')
-        plt.plot(plotCurrent, dchg, 'C%do' % (file/7 + 1), ms = 5.0)
+        plt.plot(plotCurrent, chg, 'C%do' % (file/7), ms = 5.0,  fillstyle = 'none')
+        plt.plot(plotCurrent, dchg, 'C%do' % (file/7), ms = 5.0)
         plt.xlabel('Current (mA/g)', fontsize = 'x-large')
         plt.ylabel('Capacity (mAh/g)', fontsize = 'x-large')
     plt.minorticks_off()
@@ -852,7 +934,7 @@ def plotDischargeVsRate():
             count += 1
         plt.xscale('log')
         plt.xticks([x for x in plotCurrents],[round(x, 0) for x in plotCurrents])
-        plt.plot(plotCurrent, dchg, 'C%do' % (file/7 + 1), ms = 5.0)
+        plt.plot(plotCurrent, dchg, 'C%do' % (file/7), ms = 5.0)
         plt.xlabel('Current (mA/g)', fontsize = 'x-large')
         plt.ylabel('Discharge Capacity (mAh/g)', fontsize = 'x-large')
     plt.minorticks_off()
@@ -870,6 +952,11 @@ def plot(fileNum = 1):
 def overlay(boxcar = 5, cycle = 1):
     plotAllFilesVoltsVsCapacity(cycle)
     plotAllFilesdQVsVolts(boxcar, cycle)
+    
+# Runs methods to plot the capacity vs rate
+def rate():
+    plotCapacityVsRate()
+    plotDischargeVsRate()
     
 print('\nAvailable Functions:')
 print('newFile()')
@@ -889,20 +976,25 @@ print('plotdQVsVolts(boxcar = 5, cycle = 1, fileNum = 1)')
 print('plotdQCycleWindow(cycle1, cycle2, boxcar = 5, fileNum = 1)')
 print('plotAllCyclesdQVsVolts(boxcar = 5, fileNum = 1)')
 print('plotAllFilesdQVsVolts(boxcar = 5, cycle = 1)')
-print('plotCapacityVsCycle(fileNum = 1)')
+print('plotCapacityVsCycle(fileNum = 1, legend = False)')
 print('plotChargeCapacityVsCycle(fileNum = 1)')
 print('plotDischargeCapacityVsCycle(fileNum = 1)')
+print('plotAllFilesCapacityVsCycle(legend = False)')
+print('plotCapacityVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False)')
+print('plotAllFilesCapacityVsCycleWindow(cycle1, cycle2, legend = False)')
 print('plotEnergyVsCycle(fileNum = 1)')
 print('plotChargeEnergyVsCycle(fileNum = 1)')
 print('plotDischargeEnergyVsCycle(fileNum = 1)')
-print('plotAllFilesCapacityVsCycle()')
 print('plotAllFilesEnergyVsCycle()')
 print('plotCapacityVsRate()')
 print('plotDischargeVsRate()')
 print('plot(fileNum = 1)')
-print('overlay(boxcar = 5, cycle = 1)\n')
+print('overlay(boxcar = 5, cycle = 1)')
+print('rate()\n')
 
 newFile()
+# plotCapacityVsCycleWindow(1, 15)
+# plotAllFilesCapacityVsCycleWindow(1,6)
 # plotVoltageWindowCycleWindow(3.5, 4.2, 1, 13)
 # plotAllCyclesVoltageWindow(2.3, 6)
 # plotVoltsVsCapacityCycleWindow(1, 12)
