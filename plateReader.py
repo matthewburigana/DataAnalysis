@@ -27,9 +27,8 @@ zName = ''
 # mass = {x: 0.0 for x in range(1, 65)}
 mass = []
 
-# A dictionary to store the currents from each channel where the channel
+# A list to store the currents from each channel where the channel
 # number is the key and the value is a list of currents
-# channels = {x: [] for x in range(1, 65)}
 channels = []
 
 numFiles = 0
@@ -251,24 +250,19 @@ def allCapacities(fileNum = 1):
         for j in range(min(cycles[fileNum-1]), int(max(cycles[fileNum-1])/2) + 1):
             print(capacity(i, j, fileNum))
 
-# Calculates then prints the average voltages of each channel using Vavg = VdQ/Q
-def averageVoltages(startTime, endTime, fileNum = 1):
+# Calculates then prints the average voltages of each channel between the current peaks
+def averageVoltages(fileNum = 1):
     fileNum -= 1
     capacities = {}
     for i in range(1, 65):
         capacities[i] = []
         voltage = 0.0
         
-        # Appends the specific capacity at each time to the capacities dictionary then calculates the 
-        # differential voltage and adds that to the sum of VdQ then divides that sum by the total capacity
-        # to give the average voltage
-        for j in range(len(times[fileNum])):
-            if(times[fileNum][j] >= startTime and times[fileNum][j] <= endTime and j < len(times[fileNum]) - 1):
-                capacities[i].append(0.5*(channels[fileNum][i][j] + channels[fileNum][i][j+1])*(times[fileNum][j+1] - times[fileNum][j])/1000000.0)
-        totalCapacity = sum(capacities[i])
-        for k in range(len(times[fileNum])):
-            if(times[fileNum][k] >= startTime and times[fileNum][k] <= endTime and k < len(capacities[i]) - 1):
-                voltage += 0.5*(voltages[fileNum][k] + voltages[fileNum][k+1])*(capacities[i][k+1] - capacities[i][k])/totalCapacity
+        # Finds indices of the minimum and maximum currents then uses the indices
+        # to find the voltages at those indices and average them
+        chgIndex = channels[fileNum][i].index(max(channels[fileNum][i]))
+        dchgIndex = channels[fileNum][i].index(min(channels[fileNum][i]))
+        voltage = (voltages[fileNum][chgIndex] + voltages[fileNum][dchgIndex])/2
         print('Channel %d average voltage: %f V' % (i, voltage))
     
 # Prints the resistances of all 64 channels based on the linear regression of 
@@ -1239,7 +1233,7 @@ print('capacity(channel, cycle = 1, fileNum = 1)')
 print('capacity64(cycle = 1, fileNum = 1)')
 print('capacityAllCycles(channel, fileNum = 1)')
 print('allCapacities()')
-print('averageVoltages(startTime, endTime, fileNum = 1)')
+print('averageVoltages(fileNum = 1)')
 print('resistances(cycle = 1, fileNum = 1)')
 print('allResistances()')
 print('plotCurrentVsVolts(channel, cycle = 1, xMin = 3.1, xMax = 4.5, fileNum = 1)')
@@ -1268,6 +1262,7 @@ print('plotChargeCapacityVsCycle(channel, fileNum = 1)')
 print('plotDischargeCapacityVsCycle(channel, fileNum = 1)\n')
 
 newFile()
+# averageVoltages()
 # plotAllFilesCurrentVsVolts64()
 # plotCurrentVsVolts64()
 # plotAllFilesAllCyclesNormalizedCurrentVsVolts(1)

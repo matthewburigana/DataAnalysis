@@ -34,6 +34,7 @@ def newFile(dataColumn = 'A', dataLabel = ''):
     else:
         raise ValueError('dataColumn must be a character or number')
            
+    # Takes the file name and clears stored data
     filename = input('Enter the phase diagram file name: ') + '.csv'
     if (xVal != []):
         xVal.clear()
