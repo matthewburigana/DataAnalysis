@@ -106,7 +106,8 @@ def newFile():
                 if(float(row[7]) == 0.0 and float(row[5]) >=0 and len(times[numFiles]) < currentCycle):
                     time = row[11].strip()
                     times[numFiles].append(time[11:])
-
+                    
+    # Calculates the mass by dividing the discharge capacity by the specific discharge capacity
     mass.append(round(cycleDchgCap[numFiles][0]/sCycleDchgCap[numFiles][0], 4))
     numFiles += 1
     print('File %d is %s' % (numFiles, filename))
@@ -139,8 +140,10 @@ def cellInfo(fileNum = 1):
     fileNum -= 1
     for i in range(int(max(cycles[fileNum]))):
         print('Cycle %d' % (i+1))
-        print('Charge Capacity: %.4f mAh, Discharge Capacity: %.4f mAh, Specific Charge Capacity: %.4f mAh/g, Specific Discharge Capacity: %.4f mAh/g' % (cycleChgCap[fileNum][i], cycleDchgCap[fileNum][i], sCycleChgCap[fileNum][i], sCycleDchgCap[fileNum][i]))
-        print('Charge Energy: %.4f Wh, Discharge Energy: %.4f Wh, Specific Charge Energy: %.4f Wh/g, Specific Discharge Energy: %.4f Wh/g' % (cycleChgEng[fileNum][i], cycleDchgEng[fileNum][i], sCycleChgEng[fileNum][i], sCycleDchgEng[fileNum][i]))
+        print('Charge Capacity: %.4f mAh, Discharge Capacity: %.4f mAh, Specific Charge Capacity: %.4f mAh/g, Specific Discharge Capacity: %.4f mAh/g' % 
+              (cycleChgCap[fileNum][i], cycleDchgCap[fileNum][i], sCycleChgCap[fileNum][i], sCycleDchgCap[fileNum][i]))
+        print('Charge Energy: %.4f Wh, Discharge Energy: %.4f Wh, Specific Charge Energy: %.4f Wh/g, Specific Discharge Energy: %.4f Wh/g' % 
+              (cycleChgEng[fileNum][i], cycleDchgEng[fileNum][i], sCycleChgEng[fileNum][i], sCycleDchgEng[fileNum][i]))
 
 # Changes the sample mass to a user input mass
 def setMass(fileNum = 1):
@@ -154,6 +157,8 @@ def setMass(fileNum = 1):
         sCycleChgEng[fileNum][i] = cycleChgEng[fileNum][i]/mass[fileNum]
         sCycleDchgCap[fileNum][i] = cycleDchgCap[fileNum][i]/mass[fileNum]
         sCycleDchgEng[fileNum][i] = cycleDchgEng[fileNum][i]/mass[fileNum]
+        
+    # Goes through every individual capacity to recalculate with the new mass
     for j in range(len(capacities[fileNum])):
         sCapacities[fileNum][j] = capacities[fileNum][j]/mass[fileNum]
         sEnergies[fileNum][j] = energies[fileNum][j]/mass[fileNum]
@@ -166,7 +171,8 @@ def plotVoltsVsCapacity(cycle, fileNum = 1):
     lastCap = 0.0
 
     # Appends voltages and capacities for the cell during the input cycle to the cycleVoltages and cycleCapacities
-    # lists then plots the resulting data
+    # lists then plots the resulting data. The last charge capacity is added to every discharge capacity multiplied
+    # by minus 1 to shift the discharge capacities so the first point is connected to the last charge capacity.
     for i in range(cycles[fileNum].index(cycle), len(cycles[fileNum]) - cycles[fileNum][::-1].index(cycle)):
         if(currents[fileNum][i] > 0.0):
             cycleCapacities.append(sCapacities[fileNum][i])
@@ -255,6 +261,7 @@ def plotVoltsVsCapacityCycleWindow(cycle1, cycle2, fileNum = 1):
     
 # Plots voltage vs capacity for all input files during the input cycle
 def plotAllFilesVoltsVsCapacity(cycle = 1):
+    
     # Loops through every file loaded
     for fileNum in range(numFiles):
         cycleCapacities = []
@@ -608,6 +615,8 @@ def plotCapacityVsCycle(fileNum = 1, legend = False):
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
         
+    # Adds cycle numbers by every 5 if there are more than 10 cycles or by 1 if there are less
+    # than 10 cycles
     if(len(cycle) > 10):
         ticks = []
         for x in cycle[4::5]:
@@ -676,6 +685,7 @@ def plotAllFilesCapacityVsCycle(legend = False):
         plotted.append(chargePlot)
         plotted.append(dischargePlot)
         
+    # Plots a legend if the parameter is true. Shrinks the plot to place the legend outside the plot
     if(legend):
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
@@ -883,6 +893,10 @@ def plotCapacityVsRate():
         for i in range(file, file + 7):
             chg.append([])
             dchg.append([])
+            
+            # Calculates the rates by dividing the current by the mass
+            # and if less than 7 files are loaded, the rate at the zero
+            # file is appended instead
             if (i < numFiles):
                 plotCurrent.append(currents[i][1]/mass[i])
                 plotCurrents.append(currents[i][1]/mass[i])
@@ -890,7 +904,8 @@ def plotCapacityVsRate():
                 plotCurrent.append(currents[0][1]/mass[0])
                 plotCurrents.append(currents[0][1]/mass[0])
                 
-            # Appends the charge and discharge capacities  
+            # Appends the charge and discharge capacities or zero if there are 
+            # less than 7 files loaded
             if(i < numFiles):          
                 chg[count].append(sCycleChgCap[i][0])
                 dchg[count].append(sCycleDchgCap[i][0])
@@ -898,6 +913,9 @@ def plotCapacityVsRate():
                 chg[count].append(0)
                 dchg[count].append(0)
             count += 1
+            
+        # Makes the x-axis a logarithmic scale and makes the rates for the last loaded
+        # file the x-axis values
         plt.xscale('log')
         plt.xticks([x for x in plotCurrents],[round(x, 0) for x in plotCurrents])
         plt.plot(plotCurrent, chg, 'C%do' % (file/7), ms = 5.0,  fillstyle = 'none')

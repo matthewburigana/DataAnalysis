@@ -5,19 +5,23 @@ import matplotlib.pyplot as plt
 
 filepath = 'C:\\Users\\Matt\\OneDrive - McGill University\\Work\\Analysis\\PXRD\\'
  
-# Lists to store the x and y data to be fit
+# Lists to store the angle, intensity, and fit values
 xData = []
 yData = []
 yFit= []
 numFiles = 0
 
-# Loads a new file and clears any previously stored data if there is any.
+# Loads a new file
 def newFile():
     desiredFile = input('Enter the CSV file name: ')
+    
+    # Plots all files individually in a directory if no name is given
     if (desiredFile == ''):
         for filename in os.listdir(filepath):
             processor(filename)
             plotXRD(numFiles)
+            
+    # Plots a single file when a name is given
     else:
         desiredFile = desiredFile + '.csv'
         processor(desiredFile)
@@ -31,6 +35,7 @@ def processor(name):
     yData.append([])
     yFit.append([])
              
+    # Opens the file name and appends data to the lists with the fit if it is present
     with open(filepath + name, 'r') as inputData:
         reader = csv.reader(inputData, dialect = 'excel')
         for row in islice(reader, 1, None):
@@ -39,6 +44,7 @@ def processor(name):
             if(len(row) > 2):
                 yFit[numFiles].append(float(row[2]))
         
+        # Finds the max data intensity and the max
         maxInt = max(yData[numFiles])
         if(len(yFit[numFiles]) != 0):
             maxFit = max(yFit[numFiles]) 
@@ -55,10 +61,17 @@ def processor(name):
 def plotXRD(fileNum = 1):
     fileNum -= 1
     plt.figure(1)
+    
+    # If a fit is present, the fit is overlayed on the data plot
     if(len(yFit[fileNum]) != 0):
         plt.plot(xData[fileNum], yData[fileNum], 'bo', ms = 1.5)
         plt.plot(xData[fileNum], yFit[fileNum], 'r', linewidth = 1.5)
+        
+    # Plots just the data without a fit when a fit is not in the file
     else:
+        
+        # Plots the data with the same color as it would have in a stack plot of the data if less
+        # 10 files are loaded
         if(numFiles <= 10):
             plt.plot(xData[fileNum], yData[fileNum], 'C%d' % fileNum, linewidth = 1.5)
         else:
@@ -75,6 +88,8 @@ def plotXRDError(fileNum = 1):
     fileNum -= 1
     error = []
     plt.figure(1)
+    
+    # Calculates the error by subtracting the fit values from the data values
     for i in range(len(yData[fileNum])):
         error.append(yData[fileNum][i] - yFit[fileNum][i] + fileNum)
     plt.plot(xData[fileNum], yData[fileNum], 'bo', ms = 1.5)
