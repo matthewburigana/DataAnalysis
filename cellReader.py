@@ -618,10 +618,7 @@ def plotCapacityVsCycle(fileNum = 1, legend = False):
     # Adds cycle numbers by every 5 if there are more than 10 cycles or by 1 if there are less
     # than 10 cycles
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[4::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -638,10 +635,7 @@ def plotChargeCapacityVsCycle(fileNum = 1):
         
     plt.plot(cycle, sCycleChgCap[fileNum], 'bo', ms = 4.0)
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[4::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -657,10 +651,7 @@ def plotDischargeCapacityVsCycle(fileNum = 1):
         cycle.append(i)
     plt.plot(cycle, sCycleDchgCap[fileNum], 'rD', ms = 4.0)
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[4::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -697,10 +688,7 @@ def plotAllFilesCapacityVsCycle(legend = False):
         if(max(cycles[i]) > maxCycle):
             maxCycle = max(cycles[i])
     if(maxCycle > 10):
-        ticks = []
-        for x in range(5, maxCycle + 1, 5):
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in range(5, maxCycle + 1, 5)])
     else:
         plt.xticks([x for x in range(1, maxCycle + 1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -734,10 +722,7 @@ def plotCapacityVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False):
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
         
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in range(cycle1, cycle2+1, 5)])
     else:
         plt.xticks([x for x in range(cycle1, cycle2+1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -775,10 +760,7 @@ def plotAllFilesCapacityVsCycleWindow(cycle1, cycle2, legend = False):
     
     # Sets the ticks on the x axis based on the maximum number of cycles of all the files
     if(cycle2-cycle1+1 > 10):
-        ticks = []
-        for x in range(cycle1, cycle2 + 1, 5):
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in range(cycle1, cycle2 + 1, 5)])
     else:
         plt.xticks([x for x in range(cycle1, cycle2+1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -800,10 +782,7 @@ def plotEnergyVsCycle(fileNum = 1):
     ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
     ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1 ,1), fontsize = 'small')
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[4::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -819,10 +798,7 @@ def plotChargeEnergyVsCycle(fileNum = 1):
         cycle.append(i)
     plt.plot(cycle, sCycleChgEng[fileNum], 'bo', ms = 4.0)
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[4::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -838,10 +814,7 @@ def plotDischargeEnergyVsCycle(fileNum = 1):
         cycle.append(i)
     plt.plot(cycle, sCycleDchgEng[fileNum], 'ro', ms = 4.0)
     if(len(cycle) > 10):
-        ticks = []
-        for x in cycle[4::5]:
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -871,14 +844,207 @@ def plotAllFilesEnergyVsCycle():
         if(max(cycles[i]) > maxCycle):
             maxCycle = max(cycles[i])
     if(maxCycle > 10):
-        ticks = []
-        for x in range(5, maxCycle + 1, 5):
-            ticks.append(x)
-        plt.xticks(ticks)
+        plt.xticks([x for x in range(5, max(cycle) + 1, 5)])
     else:
         plt.xticks([x for x in range(1, maxCycle + 1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Energy (Wh/g)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+    
+# Plots the average voltage of a cycle vs the cycle number for all cycles
+def plotAverageVoltageVsCycle(fileNum = 1, legend = False):
+    fileNum -= 1
+    averageChgVoltage = []
+    averageDchgVoltage = []
+    cycle = []
+    plt.figure(1)
+    ax = plt.subplot(111)
+        
+    # Loops through every cycle of the file
+    for i in range(1, max(cycles[fileNum])+1):
+        cycle.append(i)
+        cycleChgVoltages = []
+        cycleDchgVoltages = []
+        
+        # Loops through the indices of the cycle to append either charge or discharge voltages to the
+        # respective cycle depending on if the current is positive or negative
+        for j in range(cycles[fileNum].index(i), len(cycles[fileNum]) - cycles[fileNum][::-1].index(i)):
+            if(currents[fileNum][j] >= 0):
+                cycleChgVoltages.append(voltages[fileNum][j])
+            else:
+                cycleDchgVoltages.append(voltages[fileNum][j])
+        
+        # Averages the charge and discharge voltages for plotting
+        averageChgVoltage.append(np.average(cycleChgVoltages))
+        averageDchgVoltage.append(np.average(cycleDchgVoltages))
+    
+    # Plots the cycle numbers and average voltages
+    chargePlot, = plt.plot(cycle, averageChgVoltage, 'bo', label = 'Charge', ms = 4.0)
+    dischargePlot, = plt.plot(cycle, averageDchgVoltage, 'ro', label = 'Discharge', ms = 4.0)
+    
+    # Picks tick values depending on if there are more than 10 cycles or not
+    # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
+    if(max(cycle) > 10):
+        plt.xticks([x for x in cycle[4::5]])
+    else:
+        plt.xticks([x for x in cycle])
+        
+    # Plots a legend if it is entered as a parameter
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+        
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Average Voltage (V)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+    
+# Plots the average voltage of a cycle vs cycle number for the cycles between cycle1 and cycle2 inclusive
+def plotAverageVoltageVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False):
+    fileNum -= 1
+    averageChgVoltage = []
+    averageDchgVoltage = []
+    cycle = []
+    plt.figure(1)
+    ax = plt.subplot(111)
+    
+    # Loops through every cycle of the file
+    for i in range(cycle1, cycle2+1):
+        cycle.append(i)
+        cycleChgVoltages = []
+        cycleDchgVoltages = []
+        
+        # Loops through the indices of the cycle to append either charge or discharge voltages to the
+        # respective cycle depending on if the current is positive or negative
+        for j in range(cycles[fileNum].index(i), len(cycles[fileNum]) - cycles[fileNum][::-1].index(i)):
+            if(currents[fileNum][j] >= 0):
+                cycleChgVoltages.append(voltages[fileNum][j])
+            else:
+                cycleDchgVoltages.append(voltages[fileNum][j])
+        
+        # Averages the charge and discharge voltages for plotting
+        averageChgVoltage.append(np.average(cycleChgVoltages))
+        averageDchgVoltage.append(np.average(cycleDchgVoltages))
+    
+    # Plots the cycle numbers and average voltages
+    chargePlot, = plt.plot(cycle, averageChgVoltage, 'bo', label = 'Charge', ms = 4.0)
+    dischargePlot, = plt.plot(cycle, averageDchgVoltage, 'ro', label = 'Discharge', ms = 4.0)
+    
+    # Picks tick values depending on if there are more than 10 cycles or not
+    # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
+    if(cycle2-cycle1+1 > 10):
+        plt.xticks([x for x in cycle[4::5]])
+    else:
+        plt.xticks([x for x in cycle])
+        
+    # Plots a legend if it is entered as a parameter
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+        
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Average Voltage (V)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+    
+def plotAllFilesAverageVoltageVsCycle(legend = False):
+    plt.figure(1)
+    ax = plt.subplot(111)
+    
+    for fileNum in range(numFiles):
+        averageChgVoltage = []
+        averageDchgVoltage = []
+        cycle = []
+            
+        # Loops through every cycle of the file
+        for i in range(1, max(cycles[fileNum])+1):
+            cycle.append(i)
+            cycleChgVoltages = []
+            cycleDchgVoltages = []
+            
+            # Loops through the indices of the cycle to append either charge or discharge voltages to the
+            # respective cycle depending on if the current is positive or negative
+            for j in range(cycles[fileNum].index(i), len(cycles[fileNum]) - cycles[fileNum][::-1].index(i)):
+                if(currents[fileNum][j] >= 0):
+                    cycleChgVoltages.append(voltages[fileNum][j])
+                else:
+                    cycleDchgVoltages.append(voltages[fileNum][j])
+            
+            # Averages the charge and discharge voltages for plotting
+            averageChgVoltage.append(np.average(cycleChgVoltages))
+            averageDchgVoltage.append(np.average(cycleDchgVoltages))
+        
+        # Plots the cycle numbers and average voltages
+        chargePlot, = plt.plot(cycle, averageChgVoltage, 'C%do' % fileNum, label = 'File %d Charge' % (fileNum+1), ms = 4.0, fillstyle = 'none')
+        dischargePlot, = plt.plot(cycle, averageDchgVoltage, 'C%do' % fileNum, label = 'File %d Discharge' % (fileNum+1), ms = 4.0)
+
+    # Picks tick values depending on if there are more than 10 cycles or not
+    # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
+    if(max(cycle) > 10):
+        plt.xticks([x for x in cycle[4::5]])
+    else:
+        plt.xticks([x for x in cycle])
+        
+    # Plots a legend if it is entered as a parameter
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+        
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Average Voltage (V)', fontsize = 'x-large')
+    plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
+    plt.show()
+    
+def plotAllFilesAverageVoltageVsCycleWindow(cycle1, cycle2, legend = False):
+    plt.figure(1)
+    ax = plt.subplot(111)
+    
+    for fileNum in range(numFiles):
+        averageChgVoltage = []
+        averageDchgVoltage = []
+        cycle = []
+            
+        # Loops through every cycle of the file
+        for i in range(cycle1, cycle2+1):
+            cycle.append(i)
+            cycleChgVoltages = []
+            cycleDchgVoltages = []
+            
+            # Loops through the indices of the cycle to append either charge or discharge voltages to the
+            # respective cycle depending on if the current is positive or negative
+            for j in range(cycles[fileNum].index(i), len(cycles[fileNum]) - cycles[fileNum][::-1].index(i)):
+                if(currents[fileNum][j] >= 0):
+                    cycleChgVoltages.append(voltages[fileNum][j])
+                else:
+                    cycleDchgVoltages.append(voltages[fileNum][j])
+            
+            # Averages the charge and discharge voltages for plotting
+            averageChgVoltage.append(np.average(cycleChgVoltages))
+            averageDchgVoltage.append(np.average(cycleDchgVoltages))
+        
+        # Plots the cycle numbers and average voltages
+        chargePlot, = plt.plot(cycle, averageChgVoltage, 'C%do' % fileNum, label = 'File %d Charge' % (fileNum+1), ms = 4.0, fillstyle = 'none')
+        dischargePlot, = plt.plot(cycle, averageDchgVoltage, 'C%do' % fileNum, label = 'File %d Discharge' % (fileNum+1), ms = 4.0)
+        
+    # Picks tick values depending on if there are more than 10 cycles or not
+    # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
+    if(cycle2-cycle1+1 > 10):
+        plt.xticks([x for x in cycle[4::5]])
+    else:
+        plt.xticks([x for x in cycle])
+        
+    # Plots a legend if it is entered as a parameter
+    if(legend):
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
+        ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
+        
+    plt.xlabel('Cycle Number', fontsize = 'x-large')
+    plt.ylabel('Average Voltage (V)', fontsize = 'x-large')
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
@@ -1004,6 +1170,10 @@ print('plotEnergyVsCycle(fileNum = 1)')
 print('plotChargeEnergyVsCycle(fileNum = 1)')
 print('plotDischargeEnergyVsCycle(fileNum = 1)')
 print('plotAllFilesEnergyVsCycle()')
+print('plotAverageVoltageVsCycle(fileNum = 1, legend = False)')
+print('plotAverageVoltageVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False)')
+print('plotAllFilesAverageVoltageVsCycle(legend = False)')
+print('plotAllFilesAverageVoltageVsCycleWindow(cycle1, cycle2, legend = False)')
 print('plotCapacityVsRate()')
 print('plotDischargeVsRate()')
 print('plot(fileNum = 1)')
@@ -1011,6 +1181,12 @@ print('overlay(boxcar = 5, cycle = 1)')
 print('rate()\n')
 
 newFile()
+# plotAllFilesAverageVoltageVsCycle()
+# plot()
+# plotCapacityVsCycle()
+# plotAverageVoltageVsCycle()
+# plotAverageVoltageVsCycle(1, True)
+# plotAverageVoltageVsCycleWindow(1,6)
 # plotCapacityVsCycleWindow(1, 15)
 # plotAllFilesCapacityVsCycleWindow(1,6)
 # plotVoltageWindowCycleWindow(3.5, 4.2, 1, 13)
@@ -1034,7 +1210,6 @@ newFile()
 # setMass(1)
 # plotChargeCapacityVsCycle(1)
 # plotDischargeCapacityVsCycle(1)
-# plotCapacityVsCycle(1)
 # plotEnergyVsCycle(1)
 # plotChargeEnergyVsCycle(1)
 # plotDischargeEnergyVsCycle(1)
