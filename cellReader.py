@@ -617,7 +617,7 @@ def plotCapacityVsCycle(fileNum = 1, legend = False):
         
     # Adds cycle numbers by every 5 if there are more than 10 cycles or by 1 if there are less
     # than 10 cycles
-    if(len(cycle) > 10):
+    if(len(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -634,7 +634,7 @@ def plotChargeCapacityVsCycle(fileNum = 1):
         cycle.append(i)
         
     plt.plot(cycle, sCycleChgCap[fileNum], 'bo', ms = 4.0)
-    if(len(cycle) > 10):
+    if(len(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -650,7 +650,7 @@ def plotDischargeCapacityVsCycle(fileNum = 1):
     for i in range(1, int(max(cycles[fileNum])) + 1):
         cycle.append(i)
     plt.plot(cycle, sCycleDchgCap[fileNum], 'rD', ms = 4.0)
-    if(len(cycle) > 10):
+    if(len(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -687,7 +687,7 @@ def plotAllFilesCapacityVsCycle(legend = False):
     for i in range(numFiles):
         if(max(cycles[i]) > maxCycle):
             maxCycle = max(cycles[i])
-    if(maxCycle > 10):
+    if(maxCycle > 15):
         plt.xticks([x for x in range(5, maxCycle + 1, 5)])
     else:
         plt.xticks([x for x in range(1, maxCycle + 1)])
@@ -721,8 +721,8 @@ def plotCapacityVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False):
         ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
         
-    if(len(cycle) > 10):
-        plt.xticks([x for x in range(cycle1, cycle2+1, 5)])
+    if(len(cycle) > 15):
+        plt.xticks([x for x in range(5, cycle2+1, 5)])
     else:
         plt.xticks([x for x in range(cycle1, cycle2+1)])
     plt.xlabel('Cycle Number', fontsize = 'x-large')
@@ -759,10 +759,11 @@ def plotAllFilesCapacityVsCycleWindow(cycle1, cycle2, legend = False):
         ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1, 1), fontsize = 'small')
     
     # Sets the ticks on the x axis based on the maximum number of cycles of all the files
-    if(cycle2-cycle1+1 > 10):
-        plt.xticks([x for x in range(cycle1, cycle2 + 1, 5)])
+    if(cycle2-cycle1+1 > 15):
+        plt.xticks([x for x in range(5, cycle2 + 1, 5)])
     else:
         plt.xticks([x for x in range(cycle1, cycle2+1)])
+        
     plt.xlabel('Cycle Number', fontsize = 'x-large')
     plt.ylabel('Specific Capacity (mAh/g)', fontsize = 'x-large')
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
@@ -781,7 +782,7 @@ def plotEnergyVsCycle(fileNum = 1):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
     ax.legend(handles = [chargePlot, dischargePlot], loc = 2, bbox_to_anchor = (1 ,1), fontsize = 'small')
-    if(len(cycle) > 10):
+    if(len(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -797,7 +798,7 @@ def plotChargeEnergyVsCycle(fileNum = 1):
     for i in range(1, int(max(cycles[fileNum])) + 1):
         cycle.append(i)
     plt.plot(cycle, sCycleChgEng[fileNum], 'bo', ms = 4.0)
-    if(len(cycle) > 10):
+    if(len(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -813,7 +814,7 @@ def plotDischargeEnergyVsCycle(fileNum = 1):
     for i in range(1, int(max(cycles[fileNum])) + 1):
         cycle.append(i)
     plt.plot(cycle, sCycleDchgEng[fileNum], 'ro', ms = 4.0)
-    if(len(cycle) > 10):
+    if(len(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -843,7 +844,7 @@ def plotAllFilesEnergyVsCycle():
     for i in range(numFiles):
         if(max(cycles[i]) > maxCycle):
             maxCycle = max(cycles[i])
-    if(maxCycle > 10):
+    if(maxCycle > 15):
         plt.xticks([x for x in range(5, max(cycle) + 1, 5)])
     else:
         plt.xticks([x for x in range(1, maxCycle + 1)])
@@ -885,7 +886,7 @@ def plotAverageVoltageVsCycle(fileNum = 1, legend = False):
     
     # Picks tick values depending on if there are more than 10 cycles or not
     # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
-    if(max(cycle) > 10):
+    if(max(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -934,7 +935,7 @@ def plotAverageVoltageVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False)
     
     # Picks tick values depending on if there are more than 10 cycles or not
     # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
-    if(cycle2-cycle1+1 > 10):
+    if(cycle2-cycle1+1 > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -984,7 +985,7 @@ def plotAllFilesAverageVoltageVsCycle(legend = False):
 
     # Picks tick values depending on if there are more than 10 cycles or not
     # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
-    if(max(cycle) > 10):
+    if(max(cycle) > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
@@ -1034,7 +1035,7 @@ def plotAllFilesAverageVoltageVsCycleWindow(cycle1, cycle2, legend = False):
         
     # Picks tick values depending on if there are more than 10 cycles or not
     # Ticks by 5 for cells with more than 10 cycles or by 1 otherwise
-    if(cycle2-cycle1+1 > 10):
+    if(cycle2-cycle1+1 > 15):
         plt.xticks([x for x in cycle[4::5]])
     else:
         plt.xticks([x for x in cycle])
