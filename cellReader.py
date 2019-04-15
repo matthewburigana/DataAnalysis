@@ -950,6 +950,7 @@ def plotAverageVoltageVsCycleWindow(cycle1, cycle2, fileNum = 1, legend = False)
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
+# Plots the average voltage of all cycles for all loaded files
 def plotAllFilesAverageVoltageVsCycle(legend = False):
     plt.figure(1)
     ax = plt.subplot(111)
@@ -999,6 +1000,7 @@ def plotAllFilesAverageVoltageVsCycle(legend = False):
     plt.tick_params(direction='in', labelsize = 'large', length = 5.0, top = True, right = True)
     plt.show()
     
+# Plots the average voltage of every cycle between cycle1 and cycle2 inclusive vs cycle number for all files
 def plotAllFilesAverageVoltageVsCycleWindow(cycle1, cycle2, legend = False):
     plt.figure(1)
     ax = plt.subplot(111)
